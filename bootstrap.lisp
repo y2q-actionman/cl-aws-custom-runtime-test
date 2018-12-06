@@ -1,4 +1,8 @@
-(in-package :cl-user)
+(defpackage aws-bootstrap-test
+  (:use :cl)
+  (:export #:bootstrap))
+
+(in-package :aws-bootstrap-test)
 
 (defvar *_HANDLER*)
 (defvar *LAMBDA-TASK-ROOT*)
