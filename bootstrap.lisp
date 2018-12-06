@@ -23,9 +23,27 @@
 			       :method :POST
 			       :content response))))
 
-(defun test-handler (data headers)
+(defun default-handler (data &optional headers)
   (declare (ignore headers))
-  (format nil "Echoing request: '~A'" data))
+  (format nil "The default hander was called. Request is: '~A'" data))
+
+(defun find-handler (handler-string)
+  "Find handler. Consider as: <filename>#<symbol>"
+  (let* ((sharp-position (position #\# handler-string))
+	 (load-name (if sharp-position
+			(subseq handler-string 0 sharp-position)))
+	 (symbol-name (if sharp-position
+			  (subseq handler-string (1+ sharp-position) nil)
+			  handler-string)))
+    (when (and load-name
+	       (probe-file load-name))
+      (load load-name))
+    (if (and symbol-name
+	     (plusp (length symbol-name))
+	     (not (equal symbol-name "default-handler")))
+	(with-standard-io-syntax
+	  (read-from-string symbol-name))
+	'default-handler)))
 
 (defun bootstrap ()
   (setf drakma:*drakma-default-external-format* :utf-8)
@@ -39,5 +57,4 @@
   (sb-posix:chdir *LAMBDA-TASK-ROOT*)
 
   ;; goto main loop
-  (main-loop #'test-handler)	       ; TODO: I should see *_handler*
-  )
+  (main-loop (find-handler *_HANDLER*)))
