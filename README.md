@@ -100,7 +100,7 @@ aws lambda delete-function --function-name lisp-runtime
 
 - https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/runtimes-walkthrough.html
 
-	Official tutorial on bash. This repo's code derived from it.
+	Official tutorial on bash. This repo's code mainly derived from it.
 
 - https://www.m3tech.blog/entry/aws-lambda-custom-runtime
 
@@ -120,3 +120,10 @@ aws lambda delete-function --function-name lisp-runtime
   1. Into Dockerfile, resulting contained into bootstrap.
   2. Into bootstrap.
   3. Handler's fasl.
+
+
+# License
+
+Copyright (c) 2018 YOKOTA Yuki <y2q.actionman@gmail.com>
+
+This program is free software. It comes without any warranty, to the extent permitted by applicable law. You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2, as published by Sam Hocevar. See the COPYING file for more details.
