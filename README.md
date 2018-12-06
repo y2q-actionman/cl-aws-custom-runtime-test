@@ -1,4 +1,4 @@
-An trivial example of using Common Lisp (sbcl) on AWS lambda
+An trivial example of using Common Lisp (sbcl) as a custom runtime on AWS lambda
 ======
 
 This is experimental codes for using SBCL as a custom runtime on AWS lambda.
@@ -105,6 +105,10 @@ aws lambda delete-function --function-name lisp-runtime
 - https://www.m3tech.blog/entry/aws-lambda-custom-runtime
 
 	An example of Nim language. In Japanese.
+	
+- https://qiita.com/snmsts@github/items/ab6888f35f3d1237fae5
+
+	Uses Common Lisp on AWS, on pipes of node.js.
 
 
 # TODO
