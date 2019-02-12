@@ -2,7 +2,7 @@
 
 /usr/local/bin/sbcl \
     --non-interactive \
-    --load "/work/load_libs_at_docker_build.lisp" \
+    --load "/work/ql_libs_at_docker_build.lisp" \
     --load "/out/bootstrap.lisp" \
     --eval "(sb-ext:save-lisp-and-die \"bootstrap\" :executable t :toplevel 'aws-bootstrap-test:bootstrap)"
 

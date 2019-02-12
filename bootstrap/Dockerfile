@@ -17,6 +17,6 @@ RUN bzip2 -cd sbcl-1.4.14-x86-64-linux-binary.tar.bz2 | tar xvf - \
 # install quicklisp
 RUN /usr/local/bin/sbcl --non-interactive --load "quicklisp.lisp" --eval "(quicklisp-quickstart:install)" --eval "(ql-util:without-prompting (ql:add-to-init-file))"
 
-# install some libs for building bootstrap drakma
-COPY load_libs_at_docker_build.lisp /work/load_libs_at_docker_build.lisp
-RUN /usr/local/bin/sbcl --non-interactive --load "load_libs_at_docker_build.lisp"
+# install some libs for building bootstrap (like 'drakma').
+COPY ql_libs_at_docker_build.lisp /work/
+RUN /usr/local/bin/sbcl --non-interactive --load "ql_libs_at_docker_build.lisp"
