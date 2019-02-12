@@ -7,6 +7,7 @@ TODO List:
 
 - (DONE) Drop IPv6 support
 - (DONE) pick all env variables
+- Fix and move Docker related files
 - invocation error and initialiation error handling (https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html)
 - Roswell script loader.
 
