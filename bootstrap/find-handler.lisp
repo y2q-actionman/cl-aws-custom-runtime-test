@@ -1,10 +1,9 @@
 (in-package :aws-bootstrap)
 
 (defgeneric default-handler (data headers)
-  (:documentation "`aws-bootstrap''s default hander for AWS lambda invocation.")
-  (:method (data headers)
-    (declare (ignore headers))
-    (format nil "The default hander was called. Data is: '~A'" data)))
+  (:documentation "`aws-bootstrap''s default hander for AWS lambda invocation.
+This runtime itself does not defines any methods.  (So, users must
+define this, or `no-applicable-method' will be signaled.)"))
 
 (defun find-handler (handler-string)
   "Find a handler from AWS-Lambda function's --handler parameter.
