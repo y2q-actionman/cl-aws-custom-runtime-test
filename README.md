@@ -8,8 +8,11 @@ TODO List:
 - (DONE) Drop IPv6 support
 - (DONE) pick all env variables
 - (DONE) invocation error and initialiation error handling (https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html)
+- (DONE) Support new handler type -- AWS Lambda's standard format, and Lisp forms.
+- (DONE) rename to aws-lambda-runtime?
 - Fix and move Docker related files
 - Roswell script loader.
+- Use uiop for getenv.
 
 (2018-12-6) This README is not up-to-date. Please see [This article (japanese)](http://y2q-actionman.hatenablog.com/entry/2018/12/06/AWS_Lambda_%E3%81%AE_Custom_Runtime_%E3%81%A8%E3%81%97%E3%81%A6_Common_Lisp_%28sbcl%29_%E3%82%92%E4%BD%BF%E3%81%86)
 

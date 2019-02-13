@@ -1,6 +1,6 @@
 (in-package :cl-user)
 
-(defpackage aws-bootstrap
+(defpackage aws-lambda-runtime
   (:use :cl)
   (:export
    #:*_HANDLER*
@@ -21,5 +21,4 @@
    #:*PATH*
    #:*LD-LIBRARY-PATH*
    #:*AWS-LAMBDA-RUNTIME-API*
-   #:bootstrap
    #:default-handler))

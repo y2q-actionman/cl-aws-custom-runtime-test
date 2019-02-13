@@ -1,4 +1,4 @@
-(in-package :aws-bootstrap)
+(in-package :aws-lambda-runtime)
 
 (defgeneric default-handler (data headers)
   (:documentation "`aws-bootstrap''s default hander for AWS lambda invocation.
@@ -122,6 +122,7 @@ define this, or `no-applicable-method' will be signaled.)"))
 
 ;; 3rd pattern
 
+stub
 
 ;; 4th pattern
 
@@ -133,4 +134,3 @@ define this, or `no-applicable-method' will be signaled.)"))
 (assert (eq (find-handler "(load \"hoge.lisp\") 'format")
             'format))
 |#
-

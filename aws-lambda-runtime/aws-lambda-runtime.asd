@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
-(asdf:defsystem :aws-bootstrap
-  :description "Test (and proof-of-concept) codes for using SBCL on AWS Lambda"
+(asdf:defsystem :aws-lambda-runtime
+  :description "Test and proof-of-concept codes for using SBCL on AWS Lambda"
   :license "WTFPL"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
   :depends-on (:alexandria :drakma

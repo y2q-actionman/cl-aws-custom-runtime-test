@@ -2,7 +2,7 @@
 ;;; Please see:
 ;;; https://blog.marshallbrekka.com/post/2016-06-10/erlang-on-aws-lambda/
 
-(in-package :aws-bootstrap)
+(in-package :aws-lambda-runtime)
 
 (defun get-hosts-by-name-and-remove-ipv6 (name)
   "Calls the original `usocket:get-hosts-by-name' (via `original-get-host-by-name')

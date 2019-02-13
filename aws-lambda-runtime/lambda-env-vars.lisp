@@ -1,7 +1,7 @@
 ;;; Load AWS Lambda environmental variables.
 ;;; See: https://docs.aws.amazon.com/lambda/latest/dg/current-supported-versions.html
 
-(in-package :aws-bootstrap)
+(in-package :aws-lambda-runtime)
 
 (defmacro define-aws-lambda-env-var (name getenv-name &optional doc)
   `(defvar ,name

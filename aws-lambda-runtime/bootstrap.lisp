@@ -1,7 +1,7 @@
 ;;; This file implements AWS Lambda Runtime Interface.
 ;;; See: https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html
 
-(in-package :aws-bootstrap)
+(in-package :aws-lambda-runtime)
 
 (defvar *next-invocation-path*
   (load-time-value
@@ -34,8 +34,8 @@
 
 (defun main-loop (handler)
   "This custom runtime's main loop.
-This function contiues to retrieve an event, funcall `handler' with ,
-and send its result back."
+This function contiues to retrieve an event, funcall `handler' with
+two arg (the event and HTTP headers), and send `handler''s result back."
   (loop for (body status headers . nil)
        = (multiple-value-list (drakma:http-request *next-invocation-path*))
      as request-id = (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))
