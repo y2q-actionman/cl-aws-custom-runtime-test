@@ -39,7 +39,7 @@ define this, or `no-applicable-method' will be signaled.)"))
   "Find a handler from AWS-Lambda function's --handler parameter.
 `handler-string' is read as following:
 
-* `nil' or an empty string.
+* `equalp' with \"nil\"
 
   Returns `aws-bootstrap:default-handler'.
 
@@ -60,9 +60,11 @@ define this, or `no-applicable-method' will be signaled.)"))
   Otherwise, `handler-string' is considered as a string contains Lisp forms.
   `find-handler' evaluates the forms in order with `cl:eval' (wow!),
   and uses the result of the last form."
+  (assert (and (null handler-string)
+	       (not (equal handler-string "")))
+	  () "AWS Lambda function's handler parameter must not be an empty string")
   ;; `default-handler' pattern.
-  (when (or (null handler-string)
-	    (equal handler-string ""))
+  (when (equalp handler-string "nil")
     (return-from find-handler 'default-handler))
   ;; Checks 2nd or 3rd pattern.
   ;; If contains some space or (), I assume it is a Lisp form.
@@ -89,6 +91,8 @@ define this, or `no-applicable-method' will be signaled.)"))
 #|
 ;;; Test codes.
 
+(in-package :aws-lambda-runtime)
+
 ;; string-suffix-p
 
 (assert (string-suffix-p ".ros" "hoge.ros"))
@@ -97,10 +101,10 @@ define this, or `no-applicable-method' will be signaled.)"))
 
 ;; 1st pattern
 
-(assert (eq (find-handler nil)
+(assert (eq (find-handler "nil")
             'default-handler))
 
-(assert (eq (find-handler "")
+(assert (eq (find-handler "NIL")
             'default-handler))
 
 ;; 2nd pattern
