@@ -20,5 +20,4 @@
    #:*LAMBDA-RUNTIME-DIR*
    #:*PATH*
    #:*LD-LIBRARY-PATH*
-   #:*AWS-LAMBDA-RUNTIME-API*
-   #:default-handler))
+   #:*AWS-LAMBDA-RUNTIME-API*))
