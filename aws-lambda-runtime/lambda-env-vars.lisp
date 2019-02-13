@@ -3,61 +3,76 @@
 
 (in-package :aws-lambda-runtime)
 
-(defmacro define-aws-lambda-env-var (name getenv-name &optional doc)
-  `(defvar ,name
-     (load-time-value (sb-ext:posix-getenv ,getenv-name)) ; TODO: use `uiop'?
-     ,doc))
+(defvar *_HANDLER* nil
+  "The handler location configured on the function. (Used by `bootstrap')")
 
-(define-aws-lambda-env-var *_HANDLER* "_HANDLER" ; used by bootstrap.
-  "The handler location configured on the function.")
-
-(define-aws-lambda-env-var *AWS-REGION* "AWS_REGION"
+(defvar *AWS-REGION* nil
   "The AWS region where the Lambda function is executed.")
 
-(define-aws-lambda-env-var *AWS-EXECUTION-ENV* "AWS_EXECUTION_ENV"
+(defvar *AWS-EXECUTION-ENV* nil
   "The runtime identifier, prefixed by 'AWS_Lambda_'. For example, 'AWS_Lambda_java8'.")
 
-(define-aws-lambda-env-var *AWS-LAMBDA-FUNCTION-NAME* "AWS_LAMBDA_FUNCTION_NAME"
+(defvar *AWS-LAMBDA-FUNCTION-NAME* nil
   "The name of the function.")
 
-(define-aws-lambda-env-var *AWS-LAMBDA-FUNCTION-MEMORY-SIZE* "AWS_LAMBDA_FUNCTION_MEMORY_SIZE"
+(defvar *AWS-LAMBDA-FUNCTION-MEMORY-SIZE* nil
   "The amount of memory available to the function in MB.")
 
-(define-aws-lambda-env-var *AWS-LAMBDA-FUNCTION-VERSION* "AWS_LAMBDA_FUNCTION_VERSION"
+(defvar *AWS-LAMBDA-FUNCTION-VERSION* nil
   "The version of the function being executed.")
 
-(define-aws-lambda-env-var *AWS-LAMBDA-LOG-GROUP-NAME* "AWS_LAMBDA_LOG_GROUP_NAME"
+(defvar *AWS-LAMBDA-LOG-GROUP-NAME* nil
   "The name of the Amazon CloudWatch Logs group and stream for the function.")
 
-(define-aws-lambda-env-var *AWS-LAMBDA-LOG-STREAM-NAME* "AWS_LAMBDA_LOG_STREAM_NAME"
+(defvar *AWS-LAMBDA-LOG-STREAM-NAME* nil
   "The name of the Amazon CloudWatch Logs group and stream for the function.")
 
-(define-aws-lambda-env-var *AWS-ACCESS-KEY-ID* "AWS_ACCESS_KEY_ID"
+(defvar *AWS-ACCESS-KEY-ID* nil
   "Access keys obtained from the function's execution role.")
 
-(define-aws-lambda-env-var *AWS-SECRET-ACCESS-KEY* "AWS_SECRET_ACCESS_KEY"
+(defvar *AWS-SECRET-ACCESS-KEY* nil
   "Access keys obtained from the function's execution role.")
 
-(define-aws-lambda-env-var *AWS-SESSION-TOKEN* "AWS_SESSION_TOKEN"
+(defvar *AWS-SESSION-TOKEN* nil
   "Access keys obtained from the function's execution role.")
 
-(define-aws-lambda-env-var *LANG* "LANG"
+(defvar *LANG* nil
   "'en_US.UTF-8'. This is the locale of the runtime.")
 
-(define-aws-lambda-env-var *TZ* "TZ"
+(defvar *TZ* nil
   "The environment's timezone (UTC). The execution environment uses NTP to synchronize the system clock.")
 
-(define-aws-lambda-env-var *LAMBDA-TASK-ROOT* "LAMBDA_TASK_ROOT" ; used by bootstrap.
-  "The path to your Lambda function code.")
+(defvar *LAMBDA-TASK-ROOT* nil
+  "The path to your Lambda function code. (Used by `bootstrap')")
 
-(define-aws-lambda-env-var *LAMBDA-RUNTIME-DIR* "LAMBDA_RUNTIME_DIR"
+(defvar *LAMBDA-RUNTIME-DIR* nil
   "The path to runtime libraries.")
 
-(define-aws-lambda-env-var *PATH* "PATH"
+(defvar *PATH* nil
   "'/usr/local/bin:/usr/bin/:/bin:/opt/bin'.")
 
-(define-aws-lambda-env-var *LD-LIBRARY-PATH* "LD_LIBRARY_PATH"
+(defvar *LD-LIBRARY-PATH* nil
   "'/lib64:/usr/lib64:$LAMBDA_RUNTIME_DIR:$LAMBDA_RUNTIME_DIR/lib:$LAMBDA_TASK_ROOT:$LAMBDA_TASK_ROOT/lib:/opt/lib'.")
 
-(define-aws-lambda-env-var *AWS-LAMBDA-RUNTIME-API* "AWS_LAMBDA_RUNTIME_API" ; used by bootstrap.
-  "(custom runtime) The host and port of the runtime API.")
+(defvar *AWS-LAMBDA-RUNTIME-API* nil
+  "(custom runtime) The host and port of the runtime API. (Used by `bootstrap')")
+
+(defun load-aws-lambda-environmental-variables ()
+  (setf *_HANDLER* (sb-ext:posix-getenv "_HANDLER")
+	*AWS-REGION* (sb-ext:posix-getenv "AWS_REGION")
+	*AWS-EXECUTION-ENV* (sb-ext:posix-getenv "AWS_EXECUTION_ENV")
+	*AWS-LAMBDA-FUNCTION-NAME* (sb-ext:posix-getenv "AWS_LAMBDA_FUNCTION_NAME")
+	*AWS-LAMBDA-FUNCTION-MEMORY-SIZE* (sb-ext:posix-getenv "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
+	*AWS-LAMBDA-FUNCTION-VERSION* (sb-ext:posix-getenv "AWS_LAMBDA_FUNCTION_VERSION")
+	*AWS-LAMBDA-LOG-GROUP-NAME* (sb-ext:posix-getenv "AWS_LAMBDA_LOG_GROUP_NAME")
+	*AWS-LAMBDA-LOG-STREAM-NAME* (sb-ext:posix-getenv "AWS_LAMBDA_LOG_STREAM_NAME")
+	*AWS-ACCESS-KEY-ID* (sb-ext:posix-getenv "AWS_ACCESS_KEY_ID")
+	*AWS-SECRET-ACCESS-KEY* (sb-ext:posix-getenv "AWS_SECRET_ACCESS_KEY")
+	*AWS-SESSION-TOKEN* (sb-ext:posix-getenv "AWS_SESSION_TOKEN")
+	*LANG* (sb-ext:posix-getenv "LANG")
+	*TZ* (sb-ext:posix-getenv "TZ")
+	*LAMBDA-TASK-ROOT* (sb-ext:posix-getenv "LAMBDA_TASK_ROOT")
+	*LAMBDA-RUNTIME-DIR* (sb-ext:posix-getenv "LAMBDA_RUNTIME_DIR")
+	*PATH* (sb-ext:posix-getenv "PATH")
+	*LD-LIBRARY-PATH* (sb-ext:posix-getenv "LD_LIBRARY_PATH")
+	*AWS-LAMBDA-RUNTIME-API* (sb-ext:posix-getenv "AWS_LAMBDA_RUNTIME_API")))

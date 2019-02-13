@@ -3,11 +3,10 @@
 
 (in-package :aws-lambda-runtime)
 
-(defvar *next-invocation-path*
-  (load-time-value
-   (format nil "http://~A/2018-06-01/runtime/invocation/next"
-	   *AWS-LAMBDA-RUNTIME-API*))
-  "An URI for getting a next event.")
+(defun make-next-invocation-path ()
+  "Makes an URI for getting a next event."
+  (format nil "http://~A/2018-06-01/runtime/invocation/next"
+	  *AWS-LAMBDA-RUNTIME-API*))
 
 (defun make-invocation-response-path (request-id)
   "Makes an URI for for reporting invocation response"
@@ -19,10 +18,9 @@
   (format nil "http://~A/2018-06-01/runtime/invocation/~A/error"
 	  *AWS-LAMBDA-RUNTIME-API* request-id))
 
-(defvar *initialization-error-path*
-  (load-time-value
-   (format nil "http://~A/2018-06-01/runtime/init/error" *AWS-LAMBDA-RUNTIME-API*))
-  "An URI for reporing initialization error.")
+(defun make-initialization-error-path ()
+  "Makes an URI for reporing initialization error."
+  (format nil "http://~A/2018-06-01/runtime/init/error" *AWS-LAMBDA-RUNTIME-API*))
 
 (defun make-error-response-contents (condition)
   "Makes JSON string used for reporting invocation or initialization errors"
@@ -36,8 +34,9 @@
   "This custom runtime's main loop.
 This function contiues to retrieve an event, funcall `handler' with
 two arg (the event and HTTP headers), and send `handler''s result back."
-  (loop for (body status headers . nil)
-       = (multiple-value-list (drakma:http-request *next-invocation-path*))
+  (loop with next-invocation-path = (make-next-invocation-path)
+     for (body status headers . nil)
+       = (multiple-value-list (drakma:http-request next-invocation-path))
      as request-id = (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))
      as response-path = (make-invocation-response-path request-id) ; TODO: buffering
      as error-path = (make-invocation-error-path request-id) ; TODO: buffering
@@ -47,7 +46,7 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 				   :method :POST
 				   :content response))
 	  (error (condition)
-	    (drakma:http-request *initialization-error-path*
+	    (drakma:http-request error-path
 				 :method :POST
 				 :content (make-error-response-contents condition))))))
 
@@ -56,6 +55,7 @@ two arg (the event and HTTP headers), and send `handler''s result back."
   (let (handler)
     (handler-case
 	(progn
+	  (load-aws-lambda-environmental-variables)
 	  (setf drakma:*drakma-default-external-format* :utf-8)
 	  
 	  ;; For seeing JSON as text. (https://blog.kyanny.me/entry/2017/08/18/031415)
@@ -73,7 +73,7 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 			    (error "No handler found. (specified by ~A)" *_HANDLER*))))
       (error (condition)
 	;; Calls AWS Lambda's initialization error API.
-	(drakma:http-request *initialization-error-path*
+	(drakma:http-request (make-initialization-error-path)
 			     :method :POST
 			     :content (make-error-response-contents condition))
 	;; and exits immediately.
