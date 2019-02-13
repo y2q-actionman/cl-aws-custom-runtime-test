@@ -4,7 +4,9 @@
   :description "Test (and proof-of-concept) codes for using SBCL on AWS Lambda"
   :license "WTFPL"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
-  :depends-on (:drakma :usocket)
+  :depends-on (:alexandria :drakma
+			   ;; :usocket ; comes with drakma
+			   )
   :components
   ((:file "package")
    (:file "usocket-patch-drop-ipv6" :depends-on ("package"))
