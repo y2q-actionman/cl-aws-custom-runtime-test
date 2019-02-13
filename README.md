@@ -10,7 +10,7 @@ TODO List:
 - (DONE) invocation error and initialiation error handling (https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html)
 - (DONE) Support new handler type -- AWS Lambda's standard format, and Lisp forms.
 - (DONE) rename to aws-lambda-runtime?
-- Fix and move Docker related files
+- (DONE) Fix and move Docker related files
 - Roswell script loader.
 - Use uiop for getenv.
 
