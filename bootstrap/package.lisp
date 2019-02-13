@@ -21,4 +21,5 @@
    #:*PATH*
    #:*LD-LIBRARY-PATH*
    #:*AWS-LAMBDA-RUNTIME-API*
-   #:bootstrap))
+   #:bootstrap
+   #:default-handler))

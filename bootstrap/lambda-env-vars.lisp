@@ -5,7 +5,7 @@
 
 (defmacro define-aws-lambda-env-var (name getenv-name &optional doc)
   `(defvar ,name
-     (load-time-value (sb-ext:posix-getenv ,getenv-name))
+     (load-time-value (sb-ext:posix-getenv ,getenv-name)) ; TODO: use `uiop'?
      ,doc))
 
 (define-aws-lambda-env-var *_HANDLER* "_HANDLER" ; used by bootstrap.
