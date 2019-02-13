@@ -60,7 +60,7 @@ define this, or `no-applicable-method' will be signaled.)"))
   Otherwise, `handler-string' is considered as a string contains Lisp forms.
   `find-handler' evaluates the forms in order with `cl:eval' (wow!),
   and uses the result of the last form."
-  (assert (and (null handler-string)
+  (assert (and handler-string
 	       (not (equal handler-string "")))
 	  () "AWS Lambda function's handler parameter must not be an empty string")
   ;; `default-handler' pattern.
