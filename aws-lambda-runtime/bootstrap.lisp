@@ -69,8 +69,8 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 	  (sb-posix:chdir *LAMBDA-TASK-ROOT*) 
 
 	  ;; find this function's handler
-	  (setf handler (or (find-handler *_HANDLER*)
-			    (error "No handler found. (specified by ~A)" *_HANDLER*))))
+	  (setf handler (alexandria:ensure-function
+			 (find-handler *_HANDLER*))))
       (error (condition)
 	;; Calls AWS Lambda's initialization error API.
 	(drakma:http-request (make-initialization-error-path)
