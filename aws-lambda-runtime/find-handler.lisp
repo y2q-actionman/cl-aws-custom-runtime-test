@@ -14,8 +14,28 @@
 (defun find-handler-from-roswell-script (handler-string)
   "Tries to find a handler from Roswell script name.
  See `find-handler''s docstring"
-  (declare (ignore handler-string))
-  (assert nil ()  "This function is stub"))
+  ;; The official loader of roswell script is `roswell:script'
+  ;; function, but I think that is hacky.  I manually reads it to find
+  ;; the main function.
+  ;; 
+  ;; 1. `load' it without the first line.
+  ;; (To avoid reader errors, I load it at first.)
+  (with-open-file (in handler-string)
+    (read-line in)			; skip the first line.
+    (with-standard-io-syntax
+      (load in)))
+  ;; 2. find `in-package' form to get the package of `main'.
+  (with-open-file (in handler-string)
+    (read-line in)			; skip the first line.
+    (with-standard-io-syntax
+      (loop with main-package = :cl-user
+	 for form = (read in nil 'eof)
+	 until (eq form 'eof)
+	 when (and (listp form)
+		   (eq (first form) 'in-package))
+	 do (setf main-package (second form))
+	 finally
+	   (return (find-symbol "MAIN" main-package))))))
 
 (defun find-handler-from-lisp-forms (handler-string)
   "Tries to find a handler from lisp forms.
@@ -39,17 +59,17 @@
   "Find a handler from AWS-Lambda function's --handler parameter.
 `handler-string' is read as following:
 
+* Roswell script file name.
+
+  If `handler-string' ends with \".ros\", tries to load the file
+  as a Roswell script, and returns its main function.
+
 * AWS Lambda's standard format: \"file.method\"
 
   Tries to `load' the 'file' and find a symbol denoted by 'method'.
   If 'file' is an empty, it loads no file. (This may be useful for
   finding a built-in function.)
   'method' is read in the `CL-USER' package.
-
-* Roswell script name.
-
-  If `handler-string' ends with \".ros\", tries to load the file
-  as a Roswell script, and returns its main function.
 
 * Any number of Lisp forms.
 
@@ -67,12 +87,11 @@
 			 (char/= c #\)))))
 	 (found-handler
 	  (cond ((and special-format-like?
+		      (string-suffix-p ".ros" handler-string))
+		 (find-handler-from-roswell-script handler-string))
+		((and special-format-like?
 		      (find #\. handler-string))
 		 (find-handler-from-aws-standard-format handler-string))
-		#+ ()			; TODO
-		((and special-format-like?
-		      (string-ends-with-p ".ros" handler-string))
-		 (find-handler-from-roswell-script handler-string))
 		(t
 		 (find-handler-from-lisp-forms handler-string)))))
     (alexandria:ensure-function found-handler))) ; If not funcallble, raises an error.
@@ -108,7 +127,11 @@
 
 ;; ros script pattern
 
-;stub
+(assert (eql (find-handler "handler/roswell_script_text/hello.ros") ; assume cwd is repository root.
+	     #'cl-user::main)) 
+
+(assert (eql (find-handler "handler/roswell_script_text/empty.ros") ; assume cwd is repository root.
+	     #'ros.script.client.3723612865::main)) 
 
 ;; Lisp form pattern
 
