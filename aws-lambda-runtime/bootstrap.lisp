@@ -3,24 +3,27 @@
 
 (in-package :aws-lambda-runtime)
 
-(defun make-next-invocation-path ()
+(defun make-next-invocation-path (&optional out)
   "Makes an URI for getting a next event."
-  (format nil "http://~A/2018-06-01/runtime/invocation/next"
+  (format out "http://~A/2018-06-01/runtime/invocation/next"
 	  *AWS-LAMBDA-RUNTIME-API*))
 
-(defun make-invocation-response-path (request-id)
+(defun make-invocation-response-path (request-id &optional out)
   "Makes an URI for for reporting invocation response"
-  (format nil "http://~A/2018-06-01/runtime/invocation/~A/response"
+  (format out "http://~A/2018-06-01/runtime/invocation/~A/response"
 	  *AWS-LAMBDA-RUNTIME-API* request-id))
 
-(defun make-invocation-error-path (request-id)
+(defun make-invocation-error-path (request-id &optional out)
   "Makes an URI for for reporting invocation error"
-  (format nil "http://~A/2018-06-01/runtime/invocation/~A/error"
+  (format out "http://~A/2018-06-01/runtime/invocation/~A/error"
 	  *AWS-LAMBDA-RUNTIME-API* request-id))
 
-(defun make-initialization-error-path ()
+(defun make-initialization-error-path (&optional out)
   "Makes an URI for reporing initialization error."
-  (format nil "http://~A/2018-06-01/runtime/init/error" *AWS-LAMBDA-RUNTIME-API*))
+  (format out "http://~A/2018-06-01/runtime/init/error" *AWS-LAMBDA-RUNTIME-API*))
+
+(defconstant +aws-lambda-path-default-buffer-length+ 128
+  "Default buffer length of making path URI.")
 
 (defun make-error-response-contents (condition)
   "Makes JSON string used for reporting invocation or initialization errors"
@@ -34,36 +37,60 @@
   "This custom runtime's main loop.
 This function contiues to retrieve an event, funcall `handler' with
 two arg (the event and HTTP headers), and send `handler''s result back."
-  (loop with next-invocation-path = (make-next-invocation-path)
-     for (body status headers)
-       = (multiple-value-list
-	  (handler-case
-	      (drakma:http-request next-invocation-path)
-	    (simple-error (e)
-	      (let ((error-string (princ-to-string e)))
-		(when (and (search "Syscall poll(2) failed" error-string)
-			   (search "Operation not permitted" error-string))
-		  ;; This is a weird case; we caught EPERM on poll(2) at 
-		  ;; receiving response after sending a request.
-		  ;; 
-		  ;; I don't know how to treat this correctly, but I someday tried
-		  ;; to restart this loop, surprisingly this code returned correct
-		  ;; result, with producing same error every time. (very strange)
-		  (format *debug-io* "restarting main loop: ~A" e)
-		  (return-from main-loop
-		    (main-loop handler)))))))
-     as request-id = (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))
-     as response-path = (make-invocation-response-path request-id) ; TODO: buffering
-     as error-path = (make-invocation-error-path request-id) ; TODO: buffering
-     do (handler-case
-	    (let ((response (funcall handler body headers)))
-	      (drakma:http-request response-path
-				   :method :POST
-				   :content response))
-	  (error (condition)
-	    (drakma:http-request error-path
-				 :method :POST
-				 :content (make-error-response-contents condition))))))
+  (prog ((next-invocation-path (make-next-invocation-path))
+	 (consecutive-weird-error-count 0)
+	 (path-buffer (make-array +aws-lambda-path-default-buffer-length+
+				  :element-type 'character
+				  :fill-pointer 0 :adjustable t)))
+   next-invocation
+   (flet ((handle-weird-error (e)
+	    (when (> (incf consecutive-weird-error-count) 3)
+	      ;; give up..
+	      (format *debug-io* "consecutive ~A weird errors" consecutive-weird-error-count)
+	      (error e))
+	    (format *debug-io* "retrying by ~A" e)
+	    (go next-invocation)))
+     (multiple-value-bind (body status headers)
+	 (handler-case
+	     (drakma:http-request next-invocation-path)
+	   (simple-error (e)
+	     #+sbcl
+	     (let ((error-string (princ-to-string e)))
+	       (when (and (search "Syscall poll(2) failed" error-string)
+			  (search "Operation not permitted" error-string))
+		 ;; This is a weird case; we caught EPERM on poll(2)
+		 ;; at receiving response after sending a request.
+		 ;; 
+		 ;; I don't know how to treat this correctly, but I
+		 ;; someday tried to restart this loop, surprisingly
+		 ;; this code returned correct results. However, same
+		 ;; errors are produced every time. (very strange...)
+		 (handle-weird-error e)))
+	     (error e)))		; otherwise, resignal it.
+       (ecase status
+	 (200 t)			; ok
+	 (403
+	  (handle-weird-error "next-invocation API returned 403."))
+	 (500  ; runtime-api spec says 'Runtime should exit promptly.'
+	  ()
+	  (error "next-invocation API returned 500. aborted.")))
+       ;; Process the request.
+       (let ((request-id (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))))
+	 (setf (fill-pointer path-buffer) 0)
+	 (handler-case
+	     (let ((response (funcall handler body headers)))
+	       (make-invocation-response-path request-id path-buffer)
+	       (drakma:http-request path-buffer
+				    :method :POST
+				    :content response))
+	   (error (condition)
+	     (make-invocation-error-path request-id path-buffer)
+	     (drakma:http-request path-buffer
+				  :method :POST
+				  :content (make-error-response-contents condition)))))))
+   ;; goto next
+   (setf consecutive-weird-error-count 0)
+   (go next-invocation)))
 
 (defun bootstrap ()
   "Initialize this runtime, find a handler function, and go to `main-loop'."
