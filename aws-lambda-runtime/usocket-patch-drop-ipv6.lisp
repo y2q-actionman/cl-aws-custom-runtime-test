@@ -25,9 +25,3 @@ and removes IPv6 addresses, for supress making IPv6 sockets."
 	  (fdefinition 'usocket:get-hosts-by-name)))
   (shiftf (fdefinition 'usocket:get-hosts-by-name)
 	  (fdefinition 'get-hosts-by-name-and-remove-ipv6)))
-
-
-(eval-when (:load-toplevel :execute)
-  (trace get-hosts-by-name-and-remove-ipv6)
-  (trace usocket::host-to-hostname)
-  (trace usocket:get-hosts-by-name))

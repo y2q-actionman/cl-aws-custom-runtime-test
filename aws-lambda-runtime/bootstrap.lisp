@@ -35,8 +35,23 @@
 This function contiues to retrieve an event, funcall `handler' with
 two arg (the event and HTTP headers), and send `handler''s result back."
   (loop with next-invocation-path = (make-next-invocation-path)
-     for (body status headers . nil)
-       = (multiple-value-list (drakma:http-request next-invocation-path))
+     for (body status headers)
+       = (multiple-value-list
+	  (handler-case
+	      (drakma:http-request next-invocation-path)
+	    (simple-error (e)
+	      (let ((error-string (princ-to-string e)))
+		(when (and (search "Syscall poll(2) failed" error-string)
+			   (search "Operation not permitted" error-string))
+		  ;; This is a weird case; we caught EPERM on poll(2) at 
+		  ;; receiving response after sending a request.
+		  ;; 
+		  ;; I don't know how to treat this correctly, but I someday tried
+		  ;; to restart this loop, surprisingly this code returned correct
+		  ;; result, with producing same error every time. (very strange)
+		  (format *debug-io* "restarting main loop: ~A" e)
+		  (return-from main-loop
+		    (main-loop handler)))))))
      as request-id = (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))
      as response-path = (make-invocation-response-path request-id) ; TODO: buffering
      as error-path = (make-invocation-error-path request-id) ; TODO: buffering
@@ -61,8 +76,8 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 	  ;; For seeing JSON as text. (https://blog.kyanny.me/entry/2017/08/18/031415)
 	  (push '("application" . "json") drakma:*text-content-types*)
 	  
-	  ;; To drop IPv6 support, I patch `usocket:get-hosts-by-name'.
-	  (patch-get-hosts-by-name)
+	  ;; ;; To drop IPv6 support, I patch `usocket:get-hosts-by-name'.
+	  ;; (patch-get-hosts-by-name)
 
 	  ;; Move cwd to the AWS lambda function code.
 	  ;; I think this is convetnient to `load' them.
