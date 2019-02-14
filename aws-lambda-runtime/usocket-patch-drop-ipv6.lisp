@@ -1,6 +1,8 @@
-;;; To avoid failures of poll(2) on EPERM, I drop IPv6 support.
+;;; To avoid failures of socket(2) on EPERM, I drop IPv6 support.
 ;;; Please see:
 ;;; https://blog.marshallbrekka.com/post/2016-06-10/erlang-on-aws-lambda/
+;;;
+;;; This code is only for SBCL.
 
 (in-package :aws-lambda-runtime)
 
