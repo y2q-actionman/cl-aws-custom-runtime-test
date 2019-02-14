@@ -102,9 +102,6 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 	  
 	  ;; For seeing JSON as text. (https://blog.kyanny.me/entry/2017/08/18/031415)
 	  (push '("application" . "json") drakma:*text-content-types*)
-	  
-	  ;; ;; To drop IPv6 support, I patch `usocket:get-hosts-by-name'.
-	  ;; (patch-get-hosts-by-name)
 
 	  ;; Move cwd to the AWS lambda function code.
 	  ;; I think this is convenient to `load' them.

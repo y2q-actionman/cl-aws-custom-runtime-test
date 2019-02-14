@@ -24,6 +24,9 @@ and removes IPv6 addresses, for supress making IPv6 sockets."
   "Replace `usocket:get-hosts-by-name' with our `get-hosts-by-name-and-remove-ipv6'"
   (unless *original-get-host-by-name*
     (setf *original-get-host-by-name*
-	  (fdefinition 'usocket:get-hosts-by-name)))
-  (shiftf (fdefinition 'usocket:get-hosts-by-name)
+	  (fdefinition 'usocket::get-hosts-by-name)))
+  (shiftf (fdefinition 'usocket::get-hosts-by-name)
 	  (fdefinition 'get-hosts-by-name-and-remove-ipv6)))
+
+;; To drop IPv6 support, call `patch-get-hosts-by-name' at the
+;; initialization phase in `bootstrap'.
