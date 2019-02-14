@@ -6,7 +6,7 @@ RUN mkdir /work
 WORKDIR /work
 
 # get SBCL and ql bootstrap
-RUN curl -s -f -O -L http://prdownloads.sourceforge.net/sbcl/sbcl-1.4.14-x86-64-linux-binary.tar.bz2
+RUN curl -s -f -O -L http://prdownloads.sourceforge.net/sbcl/sbcl-1.4.16-x86-64-linux-binary.tar.bz2
 RUN curl -s -f -O "https://beta.quicklisp.org/quicklisp.lisp"
 
 # install binary to /usr/local/bin/sbcl
