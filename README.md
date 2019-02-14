@@ -11,11 +11,12 @@ TODO List:
 - (DONE) Support new handler type -- AWS Lambda's standard format, and Lisp forms.
 - (DONE) rename to aws-lambda-runtime?
 - (DONE) Fix and move Docker related files
-- Roswell script loader.
+- (DONE) Roswell script loader.
 - (DONE) Use uiop for getenv.
-- New examples: use new `find-handler`.
-- New examples: monolithic fasl examples.
-- New examples: roswell script.
+- (DONE) New examples: use new `find-handler`.
+- (DONE) New examples: monolithic fasl examples.
+- (DONE) New examples: roswell script.
+- Update this README.
 
 
 (2018-12-6) This README is not up-to-date. Please see [This article (japanese)](http://y2q-actionman.hatenablog.com/entry/2018/12/06/AWS_Lambda_%E3%81%AE_Custom_Runtime_%E3%81%A8%E3%81%97%E3%81%A6_Common_Lisp_%28sbcl%29_%E3%82%92%E4%BD%BF%E3%81%86)
