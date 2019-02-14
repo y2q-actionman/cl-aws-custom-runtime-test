@@ -53,8 +53,8 @@ two arg (the event and HTTP headers), and send `handler''s result back."
      (multiple-value-bind (body status headers)
 	 (handler-case
 	     (drakma:http-request next-invocation-path)
+	   #+sbcl
 	   (simple-error (e)
-	     #+sbcl
 	     (let ((error-string (princ-to-string e)))
 	       (when (and (search "Syscall poll(2) failed" error-string)
 			  (search "Operation not permitted" error-string))
