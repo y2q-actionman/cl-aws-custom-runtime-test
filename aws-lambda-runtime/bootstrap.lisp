@@ -80,8 +80,8 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 	  ;; (patch-get-hosts-by-name)
 
 	  ;; Move cwd to the AWS lambda function code.
-	  ;; I think this is convetnient to `load' them.
-	  (sb-posix:chdir *LAMBDA-TASK-ROOT*) 
+	  ;; I think this is convenient to `load' them.
+	  (uiop:chdir *LAMBDA-TASK-ROOT*) 
 
 	  ;; find this function's handler
 	  (setf handler (alexandria:ensure-function
