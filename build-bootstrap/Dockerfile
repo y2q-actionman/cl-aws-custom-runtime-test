@@ -9,14 +9,18 @@ WORKDIR /work
 RUN curl -s -f -O -L http://prdownloads.sourceforge.net/sbcl/sbcl-1.4.16-x86-64-linux-binary.tar.bz2
 RUN curl -s -f -O "https://beta.quicklisp.org/quicklisp.lisp"
 
-# install binary to /usr/local/bin/sbcl
-RUN bzip2 -cd sbcl-1.4.14-x86-64-linux-binary.tar.bz2 | tar xvf - \
-    && cd sbcl-1.4.14-x86-64-linux \
+# fetch and extract Roswell runtime
+RUN curl -s -f -O -L https://github.com/roswell/roswell/releases/download/v19.1.10.96/roswell_19.1.10.96.orig.tar.gz
+RUN tar xvf roswell_19.1.10.96.orig.tar.gz
+
+# install SBCL binary to /usr/local/bin/sbcl
+RUN bzip2 -cd sbcl-1.4.16-x86-64-linux-binary.tar.bz2 | tar xvf - \
+    && cd sbcl-1.4.16-x86-64-linux \
     && sh install.sh
 
 # install quicklisp
 RUN /usr/local/bin/sbcl --non-interactive --load "quicklisp.lisp" --eval "(quicklisp-quickstart:install)" --eval "(ql-util:without-prompting (ql:add-to-init-file))"
 
-# install some libs for building bootstrap (like 'drakma').
+# install some libs for building bootstrap.
 COPY ql_libs_at_docker_build.lisp /work/
 RUN /usr/local/bin/sbcl --non-interactive --load "ql_libs_at_docker_build.lisp"
