@@ -37,7 +37,13 @@
 		   (eq (first form) 'in-package))
 	 do (setf main-package (second form))
 	 finally
-	   (return (find-symbol "MAIN" main-package))))))
+	   (return
+	     (let* ((sym (find-symbol "MAIN" main-package))
+		    (func (alexandria:ensure-function sym)))
+	       ;; Connect `*standard-output*' to AWS-lambda's return value.
+	       (lambda (&rest args)
+		 (with-output-to-string (*standard-output*)
+		   (apply func args)))))))))
 
 (defun find-handler-from-lisp-forms (handler-string)
   "Tries to find a handler from lisp forms.
@@ -64,7 +70,9 @@
 * Roswell script file name.
 
   If `handler-string' ends with \".ros\", tries to `cl:load' the file
-  as a Roswell script, and returns its main function.
+  as a Roswell script. This runtime calls its main function with two
+  args (data and headers) and returns the string written to
+  `*standard-output*' as AWS-Lambda's result.
 
 * AWS Lambda's standard format: \"<file>.<method>\"
 
@@ -123,11 +131,13 @@
 
 ;; ros script pattern
 
-(assert (eql (find-handler "handler/roswell_script_text/hello.ros") ; assume cwd is repository root.
-	     #'cl-user::main)) 
+(assert (functionp
+         (find-handler "handler/03_roswell_script_text/hello.ros") ; assume cwd is repository root.
+	 )) 
 
-(assert (eql (find-handler "handler/roswell_script_text/empty.ros") ; assume cwd is repository root.
-	     #'ros.script.client.3723612865::main)) 
+(assert (functionp
+         (find-handler "handler/03_roswell_script_text/empty.ros") ; assume cwd is repository root. 
+	 )) 
 
 ;; Lisp form pattern
 
