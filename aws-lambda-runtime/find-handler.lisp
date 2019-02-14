@@ -6,9 +6,11 @@
   (let* ((dot-pos (position #\. handler-string))
 	 (file-name (subseq handler-string 0 dot-pos))
 	 (symbol-name (subseq handler-string (1+ dot-pos))))
+    (when (equal "" file-name)
+      (error "AWS standard format handler does not contains filename: ~A"
+	     handler-string))
     (with-standard-io-syntax
-      (unless (equal "" file-name)
-	(load file-name))
+      (load file-name)
       (read-from-string symbol-name))))
 
 (defun find-handler-from-roswell-script (handler-string)
@@ -61,35 +63,36 @@
 
 * Roswell script file name.
 
-  If `handler-string' ends with \".ros\", tries to load the file
+  If `handler-string' ends with \".ros\", tries to `cl:load' the file
   as a Roswell script, and returns its main function.
 
-* AWS Lambda's standard format: \"file.method\"
+* AWS Lambda's standard format: \"<file>.<method>\"
 
-  Tries to `load' the 'file' and find a symbol denoted by 'method'.
-  If 'file' is an empty, it loads no file. (This may be useful for
-  finding a built-in function.)
-  'method' is read in the `CL-USER' package.
+  Tries to `cl:load' the <file> and find a symbol denoted by <method>.
+  <method> is read as a symbol. If no package marker, it is read in
+  the `CL-USER' package.
 
 * Any number of Lisp forms.
 
   Otherwise, `handler-string' is considered as a string contains Lisp forms.
   `find-handler' evaluates the forms in order with `cl:eval' (wow!),
-  and uses the result of the last form."
+  and uses the result of the last form.
+  (Because AWS Lambda's 'handler' parameter cannot contain any spaces,
+  you need very hacky codes.)"
   (assert (and handler-string
-	       (not (equal handler-string "")))
-	  () "AWS Lambda function's handler parameter must not be an empty string")
-  (let* ((special-format-like?
-	  (loop for c across handler-string
-	     ;; If contains a whitespace or (), I assume it is a Lisp form.
-	     always (and (graphic-char-p c)
-			 (char/= c #\()
-			 (char/= c #\)))))
+	       (not (equal handler-string ""))
+	       (every #'graphic-char-p handler-string))
+	  () "Invalid format for AWS Lambda function's handler: ~A" handler-string)
+  (let* ((lisp-like?
+	  (or (char= #\' (char handler-string 0))  ; If starts with quite, it is a quoted form.
+	      (loop for c across handler-string
+		 ;; If contains '()', I assume it is a Lisp form.
+		 thereis (member c '(#\( #\))))))
 	 (found-handler
-	  (cond ((and special-format-like?
+	  (cond ((and (not lisp-like?)
 		      (string-suffix-p ".ros" handler-string))
 		 (find-handler-from-roswell-script handler-string))
-		((and special-format-like?
+		((and (not lisp-like?)
 		      (find #\. handler-string))
 		 (find-handler-from-aws-standard-format handler-string))
 		(t
@@ -110,12 +113,6 @@
 
 ;; AWS syntax pattern
 
-(assert (eql (find-handler ".identity")
-            #'cl-user::identity))
-
-(assert (eql (find-handler ".aws-lambda-runtime::bootstrap")
-            #'aws-lambda-runtime::bootstrap))
-
 (with-open-file (out "./hoge.lisp" :direction :output :if-exists :supersede)
   (format out "(defpackage #:hoge-package (:use :cl))")
   (format out "(in-package #:hoge-package)")
@@ -123,7 +120,6 @@
 
 (assert (eql (find-handler "hoge.hoge-package::hoge-func")
              (fdefinition (find-symbol "HOGE-FUNC" "HOGE-PACKAGE"))))
-
 
 ;; ros script pattern
 
@@ -135,11 +131,17 @@
 
 ;; Lisp form pattern
 
-(assert (eq (find-handler "(progn 1 2 3 4 5 'identity)")
+(assert (eql (find-handler "'identity")
+            #'cl-user::identity))
+
+(assert (eql (find-handler "'aws-lambda-runtime::bootstrap")
+            #'aws-lambda-runtime::bootstrap))
+
+(assert (eq (find-handler "(progn`,1`,2'identity)")
             #'cl-user::identity))
 
 (progn
   (delete-package "HOGE-PACKAGE")
-  (assert (eq (find-handler "(load \"hoge.lisp\") 'hoge-package::hoge-func")
+  (assert (eq (find-handler "(load\"hoge.lisp\")'hoge-package::hoge-func")
 	      (fdefinition (find-symbol "HOGE-FUNC" "HOGE-PACKAGE")))))
 |#
