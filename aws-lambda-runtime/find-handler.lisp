@@ -1,6 +1,6 @@
 (in-package :aws-lambda-runtime)
 
-(defun find-handler-from-standard-format (handler-string)
+(defun find-handler-from-aws-standard-format (handler-string)
   "Tries to find a handler by AWS Lambda's standard format.
  See `find-handler''s docstring"
   (let* ((dot-pos (position #\. handler-string))
@@ -22,12 +22,13 @@
  See `find-handler''s docstring"
   (with-input-from-string (in handler-string)
     (with-standard-io-syntax
-      (loop for form = (read in) then next-form
-	 for next-form = (read in nil 'eof)
-	 collect form into lisp-forms
-	 until (eq next-form 'eof)
+      (loop with ret
+	 for form = (read in) then (read in nil 'eof)
+	 until (eq form 'eof)
+	 ;; I `eval' forms one-by-one because I want to affect it to subsequent forms.
+	 do (setf ret (eval form))
 	 finally
-	   (return (eval `(progn ,@lisp-forms)))))))
+	   (return ret)))))
 
 (defun string-suffix-p (suffix string)
   "Returns non-nil value when `string' ends with `suffix'."
@@ -58,19 +59,23 @@
   (assert (and handler-string
 	       (not (equal handler-string "")))
 	  () "AWS Lambda function's handler parameter must not be an empty string")
-  ;; Checks syntax.
-  ;; If contains some space or (), I assume it is a Lisp form.
-  (when (loop for c across handler-string
-	   always (and (graphic-char-p c)
-		       (char/= c #\() (char/= c #\))))
-    (cond ((find #\. handler-string)
-	   (return-from find-handler
-	     (find-handler-from-standard-format handler-string)))
-	  #+ ()				; TODO
-	  ((string-ends-with-p ".ros" handler-string)
-	   (return-from find-handler
-	     (find-handler-from-standard-format handler-string)))))
-  (find-handler-from-lisp-forms handler-string))
+  (let* ((special-format-like?
+	  (loop for c across handler-string
+	     ;; If contains a whitespace or (), I assume it is a Lisp form.
+	     always (and (graphic-char-p c)
+			 (char/= c #\()
+			 (char/= c #\)))))
+	 (found-handler
+	  (cond ((and special-format-like?
+		      (find #\. handler-string))
+		 (find-handler-from-aws-standard-format handler-string))
+		#+ ()			; TODO
+		((and special-format-like?
+		      (string-ends-with-p ".ros" handler-string))
+		 (find-handler-from-roswell-script handler-string))
+		(t
+		 (find-handler-from-lisp-forms handler-string)))))
+    (alexandria:ensure-function found-handler))) ; If not funcallble, raises an error.
 
 
 #|
@@ -86,30 +91,32 @@
 
 ;; AWS syntax pattern
 
-(assert (eq (find-handler ".identity")
-            'cl-user::identity))
+(assert (eql (find-handler ".identity")
+            #'cl-user::identity))
 
-(assert (eq (find-handler ".aws-lambda-runtime::bootstrap")
-            'aws-lambda-runtime::bootstrap))
+(assert (eql (find-handler ".aws-lambda-runtime::bootstrap")
+            #'aws-lambda-runtime::bootstrap))
 
 (with-open-file (out "./hoge.lisp" :direction :output :if-exists :supersede)
   (format out "(defpackage #:hoge-package (:use :cl))")
   (format out "(in-package #:hoge-package)")
   (format out "(defun hoge-func ())"))
 
-(assert (eq (find-handler "hoge.hoge-package::hoge-func")
-            (find-symbol "HOGE-FUNC" "HOGE-PACKAGE")))
+(assert (eql (find-handler "hoge.hoge-package::hoge-func")
+             (fdefinition (find-symbol "HOGE-FUNC" "HOGE-PACKAGE"))))
 
 
 ;; ros script pattern
 
-stub
+;stub
 
 ;; Lisp form pattern
 
 (assert (eq (find-handler "(progn 1 2 3 4 5 'identity)")
-            'cl-user::identity))
+            #'cl-user::identity))
 
-(assert (eq (find-handler "(load \"hoge.lisp\") 'format")
-            'format))
+(progn
+  (delete-package "HOGE-PACKAGE")
+  (assert (eq (find-handler "(load \"hoge.lisp\") 'hoge-package::hoge-func")
+	      (fdefinition (find-symbol "HOGE-FUNC" "HOGE-PACKAGE")))))
 |#

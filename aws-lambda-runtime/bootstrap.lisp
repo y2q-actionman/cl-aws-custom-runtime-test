@@ -84,8 +84,7 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 	  (uiop:chdir *LAMBDA-TASK-ROOT*) 
 
 	  ;; find this function's handler
-	  (setf handler (alexandria:ensure-function
-			 (find-handler *_HANDLER*))))
+	  (setf handler (find-handler *_HANDLER*)))
       (error (condition)
 	;; Calls AWS Lambda's initialization error API.
 	(drakma:http-request (make-initialization-error-path)
