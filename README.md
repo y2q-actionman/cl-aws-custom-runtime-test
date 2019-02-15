@@ -1,116 +1,216 @@
 An example of using Common Lisp (sbcl) as a custom runtime on AWS lambda
 ======
 
-(2019-2-13) Now updating.
-TODO List:
-- Update this README.
+This is an example for using SBCL as a custom runtime on AWS lambda.
 
+# Overview
 
-
-
-This is experimental codes for using SBCL as a custom runtime on AWS lambda.
-
-# Features
+## Features
 
 - You can write AWS lambda function with Common Lisp.
-- Normal lisp file, compiled fasls, and Roswell scripts are ready to use.
-- You can use any Lisp libraries! (if built correctly.)
+- Normal lisp files, compiled fasls, and Roswell scripts are ready to use.
+- You can use any Lisp libraries! (if it built correctly.)
 
-# Requirements
+## Requirements
 
 - Docker :: For building binaries on AWS lambda environment (aka Amazon Linux). 
 - Proper AMI roles :: for deploying and execiting on AWS lambda.
+- AWS CLI :: for uploading AWS Lambda function.
 
-# Architecture
+## Contents of this repository
 
-## softwares
+| directory name         | description                                       |
+|------------------------|---------------------------------------------------|
+| `/aws-lambda-runtime/` | Lisp implementation of AWS Lambda custom runtime. |
+| `/build-bootstrap/`    | Scripts for building the runtime to a zip file.   |
+| `/handler/`            | Some examples of AWS Lambda functions in Lisp.    |
 
-- Docker
-- SBCL :: For AWS lambda bootstrap and all processiong of handlers.
-- Quicklisp :: For getting libraries (drakma, cl-json, etc.)
+# How to use
 
-## this repo files
+1. Build a custom runtime and publish it as a AWS Lambda layer.
+2. Write your code as a AWS Lambda function.
+3. Run!
 
-## `/aws-lambda-runtime`
+## About codes in `/aws-lambda-runtime/`
 
-## `/build-bootstrap`
+(This section explains my cunstom runtime implementation.  If you just want to make a AWS Lambda function, please skip!)
 
-- Dockerfile
+`/aws-lambda-runtime/` contains codes for using Common Lisp as a AWS custom runtime.
 
-	provides build environment.
+This code uses these libraries:
 
-	1. get and builds SBCL and quicklisp, and install.
-	2. get some quicklisp libs.
-	3. copies files below.
+- alexandia
+- uiop :: for `getenv` and `chdir`
+- drakma :: for main HTTP connection.
 
-- install_ql_libs.lisp
+This code consists of these files:
 
-	Installs some quicklisp libs at Docker build time.
+| file name              | description                                                         |
+|------------------------|---------------------------------------------------------------------|
+| aws-lambda-runtime.asd | the ASDF defsystem.                                                 |
+| package.lisp           | a package definition for this code, named `aws-lambda-runtime`.     |
+| lambda-env-vars.lisp   | variables holding environmental variables of AWS Lambda enviroment. |
+| find-handler.lisp      | codes for parsing AWS Lambda's 'handler' parameter.                 |
+| bootstrap.lisp         | bootstraps and the main loop.                                       |
 
-	FIXME: rename to bootstrap-libs, and split to Docker build and bootstrap build.
+bootstrap.lisp does almost all tasks as a AWS Lambda's custom runtime.
 
-	(Such a file is:: Installs some quicklisp libs at bootstrap build time.)
-
-
-- build.sh
-
-	Build "bootstrap" binary from `bootstrap.lisp`, and zip-s them.
-
-	TODO: compile handler libs as fasls, and compose it.
-	
-## `/handler`
-
-- bootstrap.lisp
-
-	Works as bootstrap.
+- `bootstrap` function does initialization tasks -- retrieve settings, initializes, and starts `main-loop`.
+- `main-loop` function does processing tasks -- get an event, calls your handler with it, and write its result back.
 
 
-# Usage
+You can load this code in the following code:
 
-## Move cwd to this repo.
-
-``` shell
-cd <somewhere>
+``` lisp
+(load "aws-lambda-runtime/aws-lambda-runtime.asd")
+(asdf:load-system :aws-lambda-runtime)
 ```
 
-## Build Docker container
+((At developing, I load this code into my personal machine.
+It does not work because there are no environmental variables or HTTP endpoints provided by AWS Lambda's environment, but it is suitable for test a small subsystem, like find-handler.lisp))
+
+## Build a custom runtime
+
+Let's build a new custom runtime on Amazon Linux environment.
+
+All building process is written in `build-bootstrap/build.sh` file.
+In this section, I'll explain what the script does.
+
+### Make a Dockerfile.
+
+`build-bootstrap/Dockerfile` is a definition of buiding environment.
+This Dockerfile does following:
+
+1. starts with the original amazonlinux.
+1. Gets SBCL from the official repository, and installs it. (I've tried `yum` of amazonlinux, but it does not have sbcl.)
+3. Gets quicklisp and install it.
+4. Gets and installs some libraries needed by `aws-custom-runtime`.
+
+Libraries to be installed at bulding Docker VM is `build-bootstrap/ql_libs_at_docker_build.lisp` file.
+
+Additionally, this dockerfile gets roswell sources, but does not install it.
+This is because I need only its Lisp codes for running Roswell scripts.
+
+### Build a Docker VM.
+
+To build a Docker VM named `test`, do following:
 
 ``` shell
 docker build -t test .
 ```
+(this is a part of `build-bootstrap/build.sh`)
 
-## Build bootstrap and delivery zip file by docker.
+### Build a AWS custom runtime.
 
-`build.sh` and next code assumes '/out' to output dir. (FIXME)
+Here, what you to do is:
 
-``` shell
-docker run -v `pwd`/out:/out -w /out test /work/build.sh
-```
-
-## Upload built zip to AWS lambda
-
-This code depends AWS-cli environment variables, and uses `$role` to AMI role.
+1. Start the Docker VM.
+2. In the VM, build our runtime to a single binary named **bootstrap**.
+3. Makes a zip file contains the **bootstrap** file.
 
 ``` shell
-aws lambda create-function --function-name lisp-runtime \
-	--zip-file fileb://out/aws_lambda_example.zip \
-	--runtime provided \
-	--handler currently.ignored \
-	--role $ROLE
+docker run --rm \
+       -v `pwd`:/out \
+       -v `pwd`/../aws-lambda-runtime:/aws-lambda-runtime \
+       test /out/build_bootstrap_in_vm.sh
 ```
+(this is a part of `build-bootstrap/build.sh`)
 
-## Runs it!
+This code starts the VM and calls `nuild-bootstrap/build_bootstrap_in_vm.sh`.
+This script does following:
 
-(stub)
-(screenshot here)
+1. Load required libraries and our custom runtime.
+1. Makes a single binary with `sb-ext:save-lisp-and-die` feature.
+   I named it to **bootstrap** and restarts with
+   `aws-bootstrap-test:bootstrap`, which is our bootstrap function.
+1. `zip` it.
 
-## (If renew bootstrap)
+After that, `aws_lambda_bootstrap.zip` will be made.
 
-Delete it and create again.
+### Publish is as a AWS Lambda's custom function layer.
+
+Upload the zip as a AWS Lambda's layer.
 
 ``` shell
-aws lambda delete-function --function-name lisp-runtime
+aws lambda publish-layer-version \
+    --layer-name lisp-layer \
+    --zip-file fileb://aws_lambda_bootstrap.zip
 ```
+(this is a part of `build-bootstrap/build.sh`)
+
+
+(TODO: Add a screenshot!)
+
+
+## Makes a AWS Lambda function using Lisp.
+
+(stub. I am currently writing it.)
+
+### Example 1 : most simple one.
+
+(stub. Please see `handler/01_simple_handler/`)
+
+### Example 2 : most simple one.
+
+(stub. Please see `handler/02_load_other_fasls/`)
+
+### Example 3 : Using a roswell script
+
+(stub. Please see `handler/03_roswell_script_text/`)
+
+### How to get AWS-lambda contexts.
+
+AWS-lambda contexts come into two parts.
+
+1. Environmental variables.
+
+  They are held in varibles exported by `aws-lambda-runtime` package.
+  Please see _lambda-env-vars.lisp_.
+  
+2. Http headers.
+
+   They are passed into the second argument of your handler function
+   as an alist (because I uses `Drakma`.)
+   
+   Example:
+```lisp
+    ((:CONTENT-TYPE . "application/json")
+       (:LAMBDA-RUNTIME-AWS-REQUEST-ID
+        . "092aafa5-c7cd-46ea-b305-d2e4d3b77b37")
+       (:LAMBDA-RUNTIME-DEADLINE-MS . "1550171924243")
+       (:LAMBDA-RUNTIME-INVOKED-FUNCTION-ARN
+        . "arn:aws:lambda:************:***********:function:ros_script_handler") ; masked...
+       (:LAMBDA-RUNTIME-TRACE-ID
+        . "Root=1-5c65bf11-b8f197fac0ac10e8bfc0b55a;Parent=019bf6fb19d9378c;Sampled=0")
+       (:DATE . "Thu, 14 Feb 2019 19:18:41 GMT") (:CONTENT-LENGTH . "51")
+       (:CONNECTION . "close"))
+```
+
+### Where to place new libraries?
+
+- Build a new runtime with libraries
+
+Pros: Simpler AWS-lambda function codes, faster startup.
+Cons: You must manage many runtimes.
+
+- Ships AWS-lambda function codes with a built FASL.
+
+Pros: You can share runtimes with other AWS-lambda functions.
+Cons: Slower Startup. AWS-lambda function codes must `load` it.
+
+
+# Known problems
+
+- EPERM
+
+	IPv6?
+	poll(2)?
+	
+# TODO
+
+- Build with JSON libraries?
+
+  I expect many people will use one of them, consequently!
 
 # References
 
@@ -126,25 +226,24 @@ aws lambda delete-function --function-name lisp-runtime
 
 	An example of Nim language. In Japanese.
 	
+# Related Works
+
 - https://qiita.com/snmsts@github/items/ab6888f35f3d1237fae5
 
-	Uses Common Lisp on AWS, on pipes of node.js.
+  Uses Common Lisp on AWS, on pipes of node.js, by @snmsts.
 
+- https://dev.classmethod.jp/cloud/aws/lambda-custom-runtime-common-lisp/
 
-# TODO
+  A custom runtime example using ECL.
+  This code uses a shell script for bootstrap, invokes a build Lisp binary.
 
-- specify output dir by the host script
+- https://github.com/windymelt/lambda-over-lambda
 
-- support `$_HANDLER`
+  This code convert a roswell script to another script works as a AWS Lambda custom function.
 
-  -> loading fasls by `$_HANDLER` contents, and run.
-  Reads it as `<filename>.<symbol-name of :cl-user package>`
+- https://github.com/fisxoj/cl-aws-lambda
 
-- consider where to place libraries. I think there are three places:
-  1. Into Dockerfile, resulting contained into bootstrap.
-  2. Into bootstrap.
-  3. Handler's fasl.
-
+  A new custom runtime implementation.
 
 # History
 
@@ -174,67 +273,8 @@ error-handling codes. However, quite simple.
 
 Please see [This article (japanese)](http://y2q-actionman.hatenablog.com/entry/2018/12/06/AWS_Lambda_%E3%81%AE_Custom_Runtime_%E3%81%A8%E3%81%97%E3%81%A6_Common_Lisp_%28sbcl%29_%E3%82%92%E4%BD%BF%E3%81%86)
 
-## Related Works
-
-(stub)
-
-- new one
-- windymelt
-- ECL
-- Mr.Sano 
-
-## How to get AWS-lambda contexts.
-
-AWS-lambda contexts come into two parts.
-
-1. Environmental variables.
-
-  They are held in varibles exported by `aws-lambda-runtime` package.
-  Please see _lambda-env-vars.lisp_.
-  
-2. Http headers.
-
-   They are passed into the second argument of your handler function
-   as an alist (because I uses `Drakma`.)
-   
-   Example:
-```lisp
-    ((:CONTENT-TYPE . "application/json")
-       (:LAMBDA-RUNTIME-AWS-REQUEST-ID
-        . "092aafa5-c7cd-46ea-b305-d2e4d3b77b37")
-       (:LAMBDA-RUNTIME-DEADLINE-MS . "1550171924243")
-       (:LAMBDA-RUNTIME-INVOKED-FUNCTION-ARN
-        . "arn:aws:lambda:************:***********:function:ros_script_handler") ; masked...
-       (:LAMBDA-RUNTIME-TRACE-ID
-        . "Root=1-5c65bf11-b8f197fac0ac10e8bfc0b55a;Parent=019bf6fb19d9378c;Sampled=0")
-       (:DATE . "Thu, 14 Feb 2019 19:18:41 GMT") (:CONTENT-LENGTH . "51")
-       (:CONNECTION . "close"))
-```
-
-## Where to place new libraries?
-
-- Build a new runtime with libraries
-
-Pros: Simpler AWS-lambda function codes, faster startup.
-Cons: You must manage many runtimes.
-
-- Ships AWS-lambda function codes with a built FASL.
-
-Pros: You can share runtimes with other AWS-lambda functions.
-Cons: Slower Startup. AWS-lambda function codes must `load` it.
-
-
-
-
-
-
 # License
 
 Copyright (c) 2018 YOKOTA Yuki
 
-This program is free software. It comes without any warranty, to the extent permitted by applicable law. You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2, as published by Sam Hocevar. See the COPYING file for more details.
-
-
-
-
-
+This program is free software. It comes without any warranty, to the extent permitted by applicablep law. You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2, as published by Sam Hocevar. See the COPYING file for more details.
