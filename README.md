@@ -1,6 +1,8 @@
 An example of using Common Lisp (sbcl) as a custom runtime on AWS lambda
 ======
 
+(2019-02-15) this README is not completed.
+
 This is an example for using SBCL as a custom runtime on AWS lambda.
 
 # Overview
@@ -263,7 +265,6 @@ Many enhancements:
 - (DONE) New examples: monolithic fasl examples.
 - (DONE) New examples: roswell script.
 
-
 ## 2018-12-06
 
 https://github.com/y2q-actionman/cl-aws-custom-runtime-test/releases/tag/2018-12-06-cl-advent-calendar
@@ -275,6 +276,6 @@ Please see [This article (japanese)](http://y2q-actionman.hatenablog.com/entry/2
 
 # License
 
-Copyright (c) 2018 YOKOTA Yuki
+Copyright (c) 2018,2019 YOKOTA Yuki
 
 This program is free software. It comes without any warranty, to the extent permitted by applicablep law. You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2, as published by Sam Hocevar. See the COPYING file for more details.
