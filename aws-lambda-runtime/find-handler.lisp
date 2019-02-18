@@ -13,37 +13,43 @@
       (load file-name)
       (read-from-string symbol-name))))
 
+(defun load-roswell-script (stream)
+  "Loads a roswell script from STREAM and returns the main symbol."
+  ;; The official loader of roswell script is `roswell:script'
+  ;; function, but I think that is difficult to use.
+  ;; I manually reads it to find the main function.
+  (with-standard-io-syntax
+    (loop with first-line = (read-line stream) ; skip the first line.
+       initially
+	 (assert (and (char= (char first-line 0) #\#)
+		      (char= (char first-line 1) #\!))
+		 () "No shebang in the roswell script: ~A" stream)
+       with main-symbol = nil
+       for form = (read stream nil 'eof)
+       until (eq form 'eof)
+       do (let ((val (eval form)))
+	    (when (and (symbolp val) ; Checks whether the returned value is from `cl:defun'.
+		       (string-equal (symbol-name val) "MAIN"))
+	      (setf main-symbol val)))
+       finally
+	 (return main-symbol))))
+
+(defun wrap-function-to-return-standard-output (function)
+  "Makes a new function wrapping the passed one to returns a string
+from characters written into `*standard-output*'"
+  (lambda (&rest args)
+    (with-output-to-string (*standard-output*)
+      (apply function args))))
+
 (defun find-handler-from-roswell-script (handler-string)
   "Tries to find a handler from Roswell script name.
  See `find-handler''s docstring"
-  ;; The official loader of roswell script is `roswell:script'
-  ;; function, but I think that is hacky.  I manually reads it to find
-  ;; the main function.
-  ;; 
-  ;; 1. `load' it without the first line.
-  ;; (To avoid reader errors, I load it at first.)
-  (with-open-file (in handler-string)
-    (read-line in)			; skip the first line.
-    (with-standard-io-syntax
-      (load in)))
-  ;; 2. find `in-package' form to get the package of `main'.
-  (with-open-file (in handler-string)
-    (read-line in)			; skip the first line.
-    (with-standard-io-syntax
-      (loop with main-package = :cl-user
-	 for form = (read in nil 'eof)
-	 until (eq form 'eof)
-	 when (and (listp form)
-		   (eq (first form) 'in-package))
-	 do (setf main-package (second form))
-	 finally
-	   (return
-	     (let* ((sym (find-symbol "MAIN" main-package))
-		    (func (alexandria:ensure-function sym)))
-	       ;; Connect `*standard-output*' to AWS-lambda's return value.
-	       (lambda (&rest args)
-		 (with-output-to-string (*standard-output*)
-		   (apply func args)))))))))
+  (let* ((main-symbol			; Find the main function
+	  (with-open-file (in handler-string)
+	    (load-roswell-script in)))
+	 (func (alexandria:ensure-function main-symbol)))
+    ;; Connect `*standard-output*' to AWS-lambda's return value.
+    (wrap-function-to-return-standard-output func)))
 
 (defun find-handler-from-lisp-forms (handler-string)
   "Tries to find a handler from lisp forms.
@@ -59,20 +65,13 @@
 	   (return ret)))))
 
 (defun string-suffix-p (suffix string)
-  "Returns non-nil value when `string' ends with `suffix'."
+  "Returns non-nil value when STRING ends with SUFFIX."
   (search suffix string
 	  :start2 (- (length string) (length suffix))))
 
 (defun find-handler (handler-string)
   "Find a handler from AWS-Lambda function's --handler parameter.
-`handler-string' is read as following:
-
-* Roswell script file name.
-
-  If `handler-string' ends with \".ros\", tries to `cl:load' the file
-  as a Roswell script. This runtime calls its main function with two
-  args (data and headers) and returns the string written to
-  `*standard-output*' as AWS-Lambda's result.
+HANDLER-STRING is read as following:
 
 * AWS Lambda's standard format: \"<file>.<method>\"
 
@@ -80,9 +79,16 @@
   <method> is read as a symbol. If no package marker, it is read in
   the `CL-USER' package.
 
+* Roswell script file name.
+
+  If HANDLER-STRING ends with \".ros\", tries to `cl:load' the file
+  as a Roswell script. This runtime calls its main function with two
+  args (data and headers) and returns the string written to
+  `*standard-output*' as AWS-Lambda's result.
+
 * Any number of Lisp forms.
 
-  Otherwise, `handler-string' is considered as a string contains Lisp forms.
+  Otherwise, HANDLER-STRING is considered as a string contains Lisp forms.
   `find-handler' evaluates the forms in order with `cl:eval' (wow!),
   and uses the result of the last form.
   (Because AWS Lambda's 'handler' parameter cannot contain any spaces,

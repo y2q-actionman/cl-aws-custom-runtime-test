@@ -35,8 +35,8 @@
 
 (defun main-loop (handler)
   "This custom runtime's main loop.
-This function contiues to retrieve an event, funcall `handler' with
-two arg (the event and HTTP headers), and send `handler''s result back."
+This function contiues to retrieve an event, funcall HANDLER with
+two arg (the event and HTTP headers), and send HANDLER's result back."
   (prog ((next-invocation-path (make-next-invocation-path))
 	 (consecutive-weird-error-count 0)
 	 (path-buffer (make-array +aws-lambda-path-default-buffer-length+
