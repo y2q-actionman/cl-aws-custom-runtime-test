@@ -1,3 +1,5 @@
+(in-package :cl-user)
+
 ;;; for bootstrap ifself.
 (ql:quickload :alexandria)
 (ql:quickload :drakma)
