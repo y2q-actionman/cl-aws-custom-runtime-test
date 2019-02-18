@@ -2,7 +2,6 @@
 (ql:quickload :alexandria)
 (ql:quickload :drakma)
 (ql:quickload :uiop)
-(ql:quickload :cl-fad)
 
 ;;; for loading Roswell
 (ql:quickload :simple-date-time)
