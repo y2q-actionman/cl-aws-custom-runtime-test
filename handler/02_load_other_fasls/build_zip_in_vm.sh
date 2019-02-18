@@ -9,6 +9,7 @@ ZIP_FILE=load_other_fasls.zip
 sbcl --non-interactive \
      --load build_monolithic_fasl.lisp \
      --load needed_libs.asd \
-     --eval "(build-monilithic-fasl :needed-libs \"$THIS_DIR\")"
+     --eval "(ql:quickload :needed-libs)" \
+     --eval "(build-monolithic-fasl :needed-libs \"$THIS_DIR\")"
 
 zip $ZIP_FILE *.fasl $MAIN_LISP_FILE

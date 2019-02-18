@@ -1,9 +1,11 @@
 (in-package :cl-user)
 
-(ql:quickload "cl-fad")
+;;; I want to put this code at a good place.. but where it it?
 
-(defun build-monilithic-fasl (system-name target-dir)
-  (ql:quickload system-name)
+(ql:quickload :asdf)
+(ql:quickload :cl-fad)
+
+(defun build-monolithic-fasl (system-name target-dir)
   (asdf:operate 'asdf:monolithic-compile-bundle-op system-name)
   (loop for fasl in (asdf:output-files 'asdf:monolithic-compile-bundle-op system-name)
      as to-path = (make-pathname :name (pathname-name fasl)
