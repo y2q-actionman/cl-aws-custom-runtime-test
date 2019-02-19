@@ -19,3 +19,6 @@
 					 :type "fasl"
 					 :defaults pathname))))
     (mapc #'load fasls)))
+
+;;; I consider loading other fasls automatically, but it may break dependency.
+;;; I think every file should define its own load call.
