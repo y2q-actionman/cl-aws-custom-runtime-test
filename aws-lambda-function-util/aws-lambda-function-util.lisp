@@ -1,0 +1,21 @@
+(defpackage #:aws-lambda-function-util
+  (:use #:cl)
+  (:export
+   #:build-monolithic-fasl
+   #:load-fasls-in-directory))
+
+(in-package #:aws-lambda-function-util)
+
+(defun build-monolithic-fasl (system-name output-directory)
+  (asdf:operate 'asdf:monolithic-compile-bundle-op system-name)
+  (loop for fasl in (asdf:output-files 'asdf:monolithic-compile-bundle-op system-name)
+     as to-path = (make-pathname :name (pathname-name fasl)
+				 :type (pathname-type fasl)
+				 :defaults output-directory)
+     do (cl-fad:copy-file fasl to-path :overwrite t)))
+
+(defun load-fasls-in-directory (pathname)
+  (let ((fasls (directory (make-pathname :name :wild
+					 :type "fasl"
+					 :defaults pathname))))
+    (mapc #'load fasls)))
