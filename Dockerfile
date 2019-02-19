@@ -3,7 +3,9 @@ FROM amazonlinux:2017.03.1.20170812
 RUN mkdir /work
 WORKDIR /work
 
-RUN yum install -y zip bzip2
+RUN yum install -y zip bzip2 \
+  && rm -rf /var/cache/yum/* \
+  && yum clean all    
 
 ## Get SBCL and install it to /usr/local/bin/sbcl
 ARG SBCL_BIN=sbcl-1.4.16-x86-64-linux
@@ -34,16 +36,24 @@ ARG ROSWELL_VER=19.1.10.96
 RUN curl -s -f -O -L https://github.com/roswell/roswell/releases/download/v$ROSWELL_VER/roswell_$ROSWELL_VER.orig.tar.gz \
 	&& tar xvf roswell_$ROSWELL_VER.orig.tar.gz \
 	&& rm roswell_$ROSWELL_VER.orig.tar.gz \
-	&& /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:roswell)"
+	&& /usr/local/bin/sbcl --non-interactive \
+	--eval "(ql:quickload '#:roswell)" \
+	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
 
 # 'aws-lambda-function-util'
 COPY aws-lambda-function-util /work/aws-lambda-function-util/
-RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-function-util)"
+RUN /usr/local/bin/sbcl --non-interactive \
+	--eval "(ql:quickload '#:aws-lambda-function-util)" \
+	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
 
 # 'aws-lambda-runtime'
 COPY aws-lambda-runtime /work/aws-lambda-runtime/
-RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-runtime)"
+RUN /usr/local/bin/sbcl --non-interactive \
+	--eval "(ql:quickload '#:aws-lambda-runtime)" \
+	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
 
 # install some additional libs
 COPY aws-lambda-runtime-builtin-libraries /work/aws-lambda-runtime-builtin-libraries/
-RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)"
+RUN /usr/local/bin/sbcl --non-interactive \
+	--eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)" \
+	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
