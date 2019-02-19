@@ -1,15 +1,10 @@
 (in-package :cl-user)
 
 ;;; for bootstrap ifself.
-(ql:quickload :alexandria)
-(ql:quickload :drakma)
-(ql:quickload :uiop)
+;; (ql:quickload :aws-lambda-runtime) ; loaded by this call.
 
 ;;; for loading Roswell
-(ql:quickload :simple-date-time)
-(ql:quickload :plump)
-(ql:quickload :split-sequence)
-(ql:quickload :zip)
+;; (ql:quickload "roswell") ; loaded by this call.
 
 ;;; JSON Libs
 ;;; See: https://sites.google.com/site/sabraonthehill/home/json-libraries

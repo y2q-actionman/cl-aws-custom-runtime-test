@@ -2,8 +2,6 @@
 
 cd `dirname $0`
 
-LAYER_NAME="lisp-layer"
-
 # build VM.
 docker build -t test .
 
@@ -14,6 +12,7 @@ docker run --rm \
        test /out/build_bootstrap_in_vm.sh
 
 # publish as a AWS custom function layer
+LAYER_NAME="lisp-layer"
 aws lambda publish-layer-version \
     --zip-file fileb://aws_lambda_bootstrap.zip \
     --layer-name $LAYER_NAME
