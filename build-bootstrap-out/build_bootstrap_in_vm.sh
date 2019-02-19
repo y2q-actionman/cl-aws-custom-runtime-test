@@ -1,5 +1,6 @@
 #!/bin/sh
 
+ZIP_NAME=$1
 BIN_NAME="bootstrap"
 
 # Makes a 'bootstrap' binary with SBCL.
@@ -15,15 +16,13 @@ BIN_NAME="bootstrap"
 
 /usr/local/bin/sbcl \
     --non-interactive \
-    --load "/work/ql_libs_at_docker_build.lisp" \
-    --eval "(asdf:load-asd \"/work/roswell-19.1.10.96/roswell.asd\")" \
-    --eval "(ql:quickload \"roswell\")" \
-    --load "/aws-lambda-runtime/aws-lambda-runtime.asd" \
-    --eval "(ql:quickload :aws-lambda-runtime)" \
+    --eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)" \
+    --eval "(ql:quickload '#:roswell)" \
+    --eval "(ql:quickload '#:aws-lambda-runtime)" \
     --eval "(sb-ext:save-lisp-and-die \"$BIN_NAME\" :executable t :toplevel 'aws-lambda-runtime::bootstrap)"
 
 # Make a zip file from the binary. This will be uploaded to AWS Lambda as a custom runtime.
-zip /out/aws_lambda_bootstrap.zip $BIN_NAME
+zip /out/$ZIP_NAME $BIN_NAME
 
 # cleanup
 rm $BIN_NAME

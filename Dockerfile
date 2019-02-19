@@ -47,5 +47,3 @@ RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-fu
 # install some additional libs
 COPY aws-lambda-runtime-builtin-libraries /work/aws-lambda-runtime-builtin-libraries/
 RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)"
-
-# TODO: move to the top directory, fix build scripts.
