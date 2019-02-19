@@ -1,6 +1,6 @@
 (in-package :cl-user)
 
-(defpackage aws-lambda-runtime
+(defpackage #:aws-lambda-runtime
   (:use :cl)
   (:export
    #:*_HANDLER*

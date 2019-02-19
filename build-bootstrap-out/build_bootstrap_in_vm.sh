@@ -5,7 +5,7 @@ BIN_NAME="bootstrap"
 
 # Makes a 'bootstrap' binary with SBCL.
 # This code does following:
-#  1. Load required quicklisp libraries.
+#  1. Load some small libraries and quicklisp libraries.
 #  2. Load lisp codes of roswell, because I need its lisp codes for loading roswell scripts.
 #     (What I want is its Lisp code ('ros' package) only, but
 #     currently I must fetch its Lisp-implementation-management
@@ -16,6 +16,7 @@ BIN_NAME="bootstrap"
 
 /usr/local/bin/sbcl \
     --non-interactive \
+    --eval "(ql:quickload '#:aws-lambda-function-util)" \
     --eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)" \
     --eval "(ql:quickload '#:roswell)" \
     --eval "(ql:quickload '#:aws-lambda-runtime)" \

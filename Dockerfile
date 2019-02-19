@@ -36,13 +36,13 @@ RUN curl -s -f -O -L https://github.com/roswell/roswell/releases/download/v$ROSW
 	&& rm roswell_$ROSWELL_VER.orig.tar.gz \
 	&& /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:roswell)"
 
-# 'aws-lambda-runtime'
-COPY aws-lambda-runtime /work/aws-lambda-runtime/
-RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-runtime)"
-
 # 'aws-lambda-function-util'
 COPY aws-lambda-function-util /work/aws-lambda-function-util/
 RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-function-util)"
+
+# 'aws-lambda-runtime'
+COPY aws-lambda-runtime /work/aws-lambda-runtime/
+RUN /usr/local/bin/sbcl --non-interactive --eval "(ql:quickload '#:aws-lambda-runtime)"
 
 # install some additional libs
 COPY aws-lambda-runtime-builtin-libraries /work/aws-lambda-runtime-builtin-libraries/
