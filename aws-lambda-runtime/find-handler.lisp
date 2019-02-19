@@ -1,5 +1,15 @@
 (in-package :aws-lambda-runtime)
 
+(defun string-prefix-p (prefix string)
+  "Returns non-nil value when STRING starts with PREFIX."
+  (string= prefix string
+	   :end2 (length prefix)))
+
+(defun string-suffix-p (suffix string)
+  "Returns non-nil value when STRING ends with SUFFIX."
+  (string= suffix string
+	   :start2 (- (length string) (length suffix))))
+
 (defun find-handler-from-aws-standard-format (handler-string)
   "Tries to find a handler by AWS Lambda's standard format.
  See `find-handler''s docstring"
@@ -21,8 +31,7 @@
   (with-standard-io-syntax
     (loop with first-line = (read-line stream) ; skip the first line.
        initially
-	 (assert (and (char= (char first-line 0) #\#)
-		      (char= (char first-line 1) #\!))
+	 (assert (string-prefix-p "#!" first-line)
 		 () "No shebang in the roswell script: ~A" stream)
        with main-symbol = nil
        for form = (read stream nil 'eof)
@@ -57,17 +66,12 @@ from characters written into `*standard-output*'"
   (with-input-from-string (in handler-string)
     (with-standard-io-syntax
       (loop with ret
-	 for form = (read in) then (read in nil 'eof)
+	 for form = (read in nil 'eof)
 	 until (eq form 'eof)
 	 ;; I `eval' forms one-by-one because I want to affect it to subsequent forms.
 	 do (setf ret (eval form))
 	 finally
 	   (return ret)))))
-
-(defun string-suffix-p (suffix string)
-  "Returns non-nil value when STRING ends with SUFFIX."
-  (search suffix string
-	  :start2 (- (length string) (length suffix))))
 
 (defun find-handler (handler-string)
   "Find a handler from AWS-Lambda function's --handler parameter.
@@ -92,7 +96,7 @@ HANDLER-STRING is read as following:
   `find-handler' evaluates the forms in order with `cl:eval' (wow!),
   and uses the result of the last form.
   (Because AWS Lambda's 'handler' parameter cannot contain any spaces,
-  you need very hacky codes.)"
+  you need very crafted codes.)"
   (assert (and handler-string
 	       (not (equal handler-string ""))
 	       (every #'graphic-char-p handler-string))

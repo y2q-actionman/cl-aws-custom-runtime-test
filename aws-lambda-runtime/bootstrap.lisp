@@ -72,7 +72,6 @@ two arg (the event and HTTP headers), and send HANDLER's result back."
 	 (403
 	  (handle-weird-error "next-invocation API returned 403."))
 	 (500  ; runtime-api spec says 'Runtime should exit promptly.'
-	  ()
 	  (error "next-invocation API returned 500. aborted.")))
        ;; Process the request.
        (let ((request-id (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))))
