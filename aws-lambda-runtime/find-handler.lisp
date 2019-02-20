@@ -23,8 +23,31 @@
       (load file-name)
       (read-from-string symbol-name))))
 
+(alexandria:define-constant +roswell-runtime-package-name-list+
+    '(:ros :roswell)
+  :test 'equal
+  :documentation "Package names may be required by roswell scripts.
+This is used by `ensure-fake-roswell-runtime'")
+
+(defun ensure-fake-roswell-runtime ()
+  "Ensures a package named 'fake-roswell-runtime' exists.
+This package provides `ros:ensure-asdf' symbol, for loading a ros script."
+  (let* ((nicknames
+	  (or (remove-if #'find-package +roswell-runtime-package-name-list+)
+	      (return-from ensure-fake-roswell-runtime ; the package already exists.
+		(find-package 'fake-roswell-runtime))))
+	 (fr-package
+	  (make-package 'fake-roswell-runtime :use nil :nicknames nicknames))
+	 (ensure-asdf-sym (intern "ENSURE-ASDF" fr-package)))
+    ;; Roswell's `ros:ensure-asdf' returns T if ASDF was loaded.
+    ;; Because I assume this runtime has ASDF in the Lisp image, I always return T.
+    (setf (symbol-function ensure-asdf-sym) (constantly t))
+    (export ensure-asdf-sym fr-package)
+    fr-package))
+
 (defun load-roswell-script (stream)
   "Loads a roswell script from STREAM and returns the main symbol."
+  (ensure-fake-roswell-runtime)
   ;; The official loader of roswell script is `roswell:script'
   ;; function, but I think that is difficult to use.
   ;; I manually reads it to find the main function.
