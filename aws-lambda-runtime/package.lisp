@@ -1,8 +1,9 @@
 (in-package :cl-user)
 
 (defpackage #:aws-lambda-runtime
-  (:use :cl)
+  (:use #:cl #:alexandria)
   (:export
+   ;; Contexts provided by envonmental variables.
    #:*_HANDLER*
    #:*AWS-REGION*
    #:*AWS-EXECUTION-ENV*
@@ -20,4 +21,6 @@
    #:*LAMBDA-RUNTIME-DIR*
    #:*PATH*
    #:*LD-LIBRARY-PATH*
-   #:*AWS-LAMBDA-RUNTIME-API*))
+   #:*AWS-LAMBDA-RUNTIME-API*
+   ;; Contexts provided by http headers.
+   #:*HEADER-ALIST*))
