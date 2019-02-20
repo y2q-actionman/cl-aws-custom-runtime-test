@@ -35,8 +35,8 @@
 
 (defun main-loop (handler)
   "This custom runtime's main loop.
-This function contiues to retrieve an event, funcall `handler' with
-two arg (the event and HTTP headers), and send `handler''s result back."
+This function contiues to retrieve an event, funcall HANDLER with
+two arg (the event and HTTP headers), and send HANDLER's result back."
   (prog ((next-invocation-path (make-next-invocation-path))
 	 (consecutive-weird-error-count 0)
 	 (path-buffer (make-array +aws-lambda-path-default-buffer-length+
@@ -72,7 +72,6 @@ two arg (the event and HTTP headers), and send `handler''s result back."
 	 (403
 	  (handle-weird-error "next-invocation API returned 403."))
 	 (500  ; runtime-api spec says 'Runtime should exit promptly.'
-	  ()
 	  (error "next-invocation API returned 500. aborted.")))
        ;; Process the request.
        (let ((request-id (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))))

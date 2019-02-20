@@ -1,2 +1,3 @@
 *.fasl
 *.zip
+build-bootstrap-out/installed-libs.txt

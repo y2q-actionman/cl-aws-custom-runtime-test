@@ -1,13 +1,13 @@
 (in-package :cl-user)
 
-(asdf:defsystem :aws-lambda-runtime
-  :description "Test and proof-of-concept codes for using SBCL on AWS Lambda"
+(asdf:defsystem #:aws-lambda-runtime
+  :description "Test and proof-of-concept codes for using SBCL on AWS Lambda."
   :license "WTFPL"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
-  :depends-on (:alexandria
-	       :usocket ; comes with drakma
-	       :drakma
-	       :uiop)
+  :depends-on (#:alexandria
+	       #:usocket ; comes with drakma
+	       #:drakma
+	       #:uiop)
   :components
   ((:file "package")
    (:file "lambda-env-vars" :depends-on ("package"))

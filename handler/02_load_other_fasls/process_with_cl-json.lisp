@@ -2,8 +2,7 @@
 
 ;;; Load all fasls
 (eval-when (:load-toplevel :execute)
-  (mapcar #'load (directory (make-pathname :name :wild :type "fasl"
-					   :defaults *load-pathname*))))
+  (aws-lambda-function-util:load-fasls-in-directory *load-pathname*))
 
 (defun test-parse-handler (data headers)
   (declare (ignore headers))

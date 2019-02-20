@@ -58,6 +58,7 @@
   "(custom runtime) The host and port of the runtime API. (Used by `bootstrap')")
 
 (defun load-aws-lambda-environmental-variables ()
+  "Loads environmental variables of AWS Lambda system into `defvar's."
   (setf *_HANDLER* (uiop:getenv "_HANDLER")
 	*AWS-REGION* (uiop:getenv "AWS_REGION")
 	*AWS-EXECUTION-ENV* (uiop:getenv "AWS_EXECUTION_ENV")
