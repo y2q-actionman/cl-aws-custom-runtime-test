@@ -1,10 +1,14 @@
 (defpackage #:aws-lambda-function-util
   (:use #:cl)
   (:export
+   #:list-installed-systems
    #:build-monolithic-fasl
    #:load-fasls-in-directory))
 
 (in-package #:aws-lambda-function-util)
+
+(defun list-installed-systems (&optional (dists (ql-dist:all-dists)))
+  (mapcan #'ql-dist:installed-systems dists))
 
 (defun build-monolithic-fasl (system-name output-directory)
   (asdf:operate 'asdf:monolithic-compile-bundle-op system-name)
