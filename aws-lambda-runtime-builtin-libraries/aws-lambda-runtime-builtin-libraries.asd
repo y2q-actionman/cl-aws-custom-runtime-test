@@ -10,6 +10,6 @@
    :st-json
    :yason
    :jsown
-   :jonathan		    ; I surprised this lib has 8 dependencies.
+   ;; :jonathan		    ; I surprised this lib has 8 dependencies.
    :json-streams
    :com.gigamonkeys.json))
