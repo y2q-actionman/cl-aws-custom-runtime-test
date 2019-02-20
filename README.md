@@ -198,6 +198,10 @@ Cons: You must manage many runtimes.
 Pros: You can share runtimes with other AWS-lambda functions.
 Cons: Slower Startup. AWS-lambda function codes must `load` it.
 
+- Use ql-bundle
+
+(TODO: make a new example)
+
 
 # Known problems
 
@@ -247,6 +251,26 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 
 # History
 
+## 2019-02-21
+
+- (DONE) Move test codes
+- (DONE) Include JSON libs into runtime at build time.
+- (DONE) Moved `build-monolithic-fasl` and fasl loaders.
+- (DONE) Changed Dockerfile to include aws-lambda-runtime related codes.
+- (DONE) List up ql builtin libs after building binary.
+
+- Updated roswell script reader.
+  - (DONE) Uses the last package if 'main' not found.
+  - (DONE) small fake roswell runtime, removed Roswell itself from VM and runtime.
+  - (DONE) change calling convention; use `*standard-input*` and a special value.
+
+  - 特にidea もないので先駆者兄貴に従う? https://github.com/windymelt/lambda-over-lambda/blob/a4a074787009f36c0ea2a4853c0890c13f976a55/templates/template.ros#L50
+  
+- Add cl-launch script support
+- add new sample -- ql bundle
+- add new sample -- wcs or jp-numeral
+- やっぱり test ってつけ戻そうかね
+
 ## 2019-02-15
 
 Many enhancements:
@@ -262,7 +286,6 @@ Many enhancements:
 - (DONE) New examples: use new `find-handler`.
 - (DONE) New examples: monolithic fasl examples.
 - (DONE) New examples: roswell script.
-
 
 ## 2018-12-06
 
