@@ -29,17 +29,6 @@ RUN curl -s -f -O "https://beta.quicklisp.org/quicklisp.lisp" \
 # Assign WORKDIR as a local repository
 RUN echo "(push #P\"/work/\" ql:*local-project-directories*)" >>$HOME/.sbclrc
 
-# Roswell runtime.
-# (What I want is its Lisp code ('ros' package) only, but I must fetch
-# its Lisp-implementation-management feature together.)
-ARG ROSWELL_VER=19.1.10.96
-RUN curl -s -f -O -L https://github.com/roswell/roswell/releases/download/v$ROSWELL_VER/roswell_$ROSWELL_VER.orig.tar.gz \
-	&& tar xvf roswell_$ROSWELL_VER.orig.tar.gz \
-	&& rm roswell_$ROSWELL_VER.orig.tar.gz \
-	&& /usr/local/bin/sbcl --non-interactive \
-	--eval "(ql:quickload '#:roswell)" \
-	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
-
 # 'aws-lambda-function-util'
 COPY aws-lambda-function-util /work/aws-lambda-function-util/
 RUN /usr/local/bin/sbcl --non-interactive \
