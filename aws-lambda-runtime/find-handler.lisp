@@ -41,7 +41,8 @@
 		       (string-equal (symbol-name val) "MAIN"))
 	      (setf main-symbol val)))
        finally
-	 (return main-symbol))))
+	 (return (or main-symbol
+		     (find-symbol "MAIN")))))) ; Use the last `*package*' changed by `eval'.
 
 (defun wrap-function-to-return-standard-output (function)
   "Makes a new function wrapping the passed one to returns a string
@@ -50,12 +51,15 @@ from characters written into `*standard-output*'"
     (with-output-to-string (*standard-output*)
       (apply function args))))
 
-(defun find-handler-from-roswell-script (handler-string)
-  "Tries to find a handler from Roswell script name.
- See `find-handler''s docstring"
+(defun find-handler-from-script-file (handler-string)
+  "Tries to find a handler from a script name.
+See `find-handler''s docstring."
   (let* ((main-symbol			; Find the main function
-	  (with-open-file (in handler-string)
-	    (load-roswell-script in)))
+	  (cond ((string-suffix-p ".ros" handler-string)
+		 (with-open-file (in handler-string)
+		   (load-roswell-script in)))
+		(t
+		 (error "Unknown file type: ~A" handler-string))))
 	 (func (alexandria:ensure-function main-symbol)))
     ;; Connect `*standard-output*' to AWS-lambda's return value.
     (wrap-function-to-return-standard-output func)))
@@ -83,12 +87,14 @@ HANDLER-STRING is read as following:
   <method> is read as a symbol. If no package marker, it is read in
   the `CL-USER' package.
 
-* Roswell script file name.
+* A script file name. (a roswell script.)
 
-  If HANDLER-STRING ends with \".ros\", tries to `cl:load' the file
-  as a Roswell script. This runtime calls its main function with two
-  args (data and headers) and returns the string written to
-  `*standard-output*' as AWS-Lambda's result.
+  If there is a file named same with HANDLER-STRING, this runtime
+  tries to load the file and find its main function.
+
+  If found, this runtime call the main function with two args (data
+  and headers) and returns the string written to `*standard-output*'
+  as AWS-Lambda's result.
 
 * Any number of Lisp forms.
 
@@ -108,8 +114,8 @@ HANDLER-STRING is read as following:
 		 thereis (member c '(#\( #\))))))
 	 (found-handler
 	  (cond ((and (not lisp-like?)
-		      (string-suffix-p ".ros" handler-string))
-		 (find-handler-from-roswell-script handler-string))
+		      (probe-file handler-string))
+		 (find-handler-from-script-file handler-string))
 		((and (not lisp-like?)
 		      (find #\. handler-string))
 		 (find-handler-from-aws-standard-format handler-string))
