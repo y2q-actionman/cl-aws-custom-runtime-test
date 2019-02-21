@@ -11,7 +11,7 @@ This is an example for using SBCL as a custom runtime on AWS lambda.
 
 - You can write AWS lambda function with Common Lisp.
 - Normal lisp files, compiled fasls, and Roswell scripts are ready to use.
-- You can use any Lisp libraries! (if it built correctly.)
+- You can use any Lisp libraries (if it built correctly.)
 
 ## Requirements
 
@@ -21,11 +21,13 @@ This is an example for using SBCL as a custom runtime on AWS lambda.
 
 ## Contents of this repository
 
-| directory name         | description                                       |
-|------------------------|---------------------------------------------------|
-| `/aws-lambda-runtime/` | Lisp implementation of AWS Lambda custom runtime. |
-| `/build-bootstrap/`    | Scripts for building the runtime to a zip file.   |
-| `/handler/`            | Some examples of AWS Lambda functions in Lisp.    |
+| directory name                           | description                                                                            |
+|------------------------------------------|----------------------------------------------------------------------------------------|
+| `/aws-lambda-runtime/`                   | Lisp implementation of AWS Lambda custom runtime.                                      |
+| `/aws-lambda-function-util/`             | Some utilities for building Lisp AWS Lambda function.                                  |
+| `/aws-lambda-runtime-builtin-libraries/` | Libraries not used by `aws-lambda-runtime` but built into our custom runtime together. |
+| `/build-bootstrap-out/`                  | Scripts for building the runtime to a zip file.                                        |
+| `/handler/`                              | Some examples of AWS Lambda functions in Lisp.                                         |
 
 # How to use
 
@@ -75,7 +77,7 @@ It does not work because there are no environmental variables or HTTP endpoints 
 
 Let's build a new custom runtime on Amazon Linux environment.
 
-All building process is written in `build-bootstrap/build.sh` file.
+All building process is written in `build_all.sh` file.
 In this section, I'll explain what the script does.
 
 ### Make a Dockerfile.
@@ -86,12 +88,7 @@ This Dockerfile does following:
 1. starts with the original amazonlinux.
 1. Gets SBCL from the official repository, and installs it. (I've tried `yum` of amazonlinux, but it does not have sbcl.)
 3. Gets quicklisp and install it.
-4. Gets and installs some libraries needed by `aws-custom-runtime`.
-
-Libraries to be installed at bulding Docker VM is `build-bootstrap/ql_libs_at_docker_build.lisp` file.
-
-Additionally, this dockerfile gets roswell sources, but does not install it.
-This is because I need only its Lisp codes for running Roswell scripts.
+4. Gets and installs some libraries needed by `aws-custom-runtime`, `aws-lambda-function-util`, and `aws-lambda-runtime-builtin-libraries`..
 
 ### Build a Docker VM.
 
@@ -100,7 +97,7 @@ To build a Docker VM named `test`, do following:
 ``` shell
 docker build -t test .
 ```
-(this is a part of `build-bootstrap/build.sh`)
+(this is a part of `build_all.sh`)
 
 ### Build a AWS custom runtime.
 
@@ -112,22 +109,24 @@ Here, what you to do is:
 
 ``` shell
 docker run --rm \
-       -v `pwd`:/out \
-       -v `pwd`/../aws-lambda-runtime:/aws-lambda-runtime \
+       -v `pwd`/build-bootstrap-out:/out \
        test /out/build_bootstrap_in_vm.sh
 ```
-(this is a part of `build-bootstrap/build.sh`)
+(this is a part of `build_all.sh`)
 
-This code starts the VM and calls `nuild-bootstrap/build_bootstrap_in_vm.sh`.
+This code starts the VM and calls `build-bootstrap-out/build_bootstrap_in_vm.sh`.
 This script does following:
 
-1. Load required libraries and our custom runtime.
+1. Loads required libraries and our custom runtime.
 1. Makes a single binary with `sb-ext:save-lisp-and-die` feature.
    I named it to **bootstrap** and restarts with
    `aws-bootstrap-test:bootstrap`, which is our bootstrap function.
 1. `zip` it.
 
 After that, `aws_lambda_bootstrap.zip` will be made.
+
+(Additionaly, this script makes a text file lists built-in libraries.
+This is only for provide some information to writers of AWS Lambda function.
 
 ### Publish is as a AWS Lambda's custom function layer.
 
@@ -138,7 +137,7 @@ aws lambda publish-layer-version \
     --layer-name lisp-layer \
     --zip-file fileb://aws_lambda_bootstrap.zip
 ```
-(this is a part of `build-bootstrap/build.sh`)
+(this is a part of `build_all.sh`)
 
 
 (TODO: Add a screenshot!)
@@ -152,9 +151,13 @@ aws lambda publish-layer-version \
 
 (stub. Please see `handler/01_simple_handler/`)
 
-### Example 2 : most simple one.
+### Example 2 : ships with other libraries.
 
 (stub. Please see `handler/02_load_other_fasls/`)
+
+- variant 1 : with one fasl.
+- variant 2 : only one big fasl.
+- variant 3 : ql-bundle
 
 ### Example 3 : Using a roswell script
 
@@ -271,7 +274,12 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 - Add cl-launch script support
 - add new sample -- ql bundle
 - add new sample -- wcs or jp-numeral
-- やっぱり test ってつけ戻そうかね
+- new calling convention -- pass stream directly?
+  (select by environmental variable -- `:string`, or `:standard-io`)
+- add a switch to change `*drakma-default-external-format*`
+- renaming
+  - やっぱり test ってつけ戻そうかね
+  - builtin -> include??
 
 ## 2019-02-15
 
