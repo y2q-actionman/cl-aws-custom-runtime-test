@@ -19,13 +19,13 @@ This is an example for using SBCL as a custom runtime on AWS lambda.
 
 ## Contents of this repository
 
-| directory name                           | description                                                                            |
-|------------------------------------------|----------------------------------------------------------------------------------------|
-| `/aws-lambda-runtime/`                   | Lisp implementation of AWS Lambda custom runtime.                                      |
-| `/aws-lambda-function-util/`             | Some utilities for building Lisp AWS Lambda function.                                  |
-| `/aws-lambda-runtime-builtin-libraries/` | Libraries not used by `aws-lambda-runtime` but built into our custom runtime together. |
-| `/build-bootstrap-out/`                  | Scripts for building the runtime to a zip file.                                        |
-| `/handler/`                              | Some examples of AWS Lambda functions in Lisp.                                         |
+| directory name                              | description                                                                            |
+|---------------------------------------------|----------------------------------------------------------------------------------------|
+| `/aws-lambda-runtime/`                      | Lisp implementation of AWS Lambda custom runtime.                                      |
+| `/aws-lambda-function-util/`                | Some utilities for building Lisp AWS Lambda function.                                  |
+| `/aws-lambda-runtime-additional-libraries/` | Libraries not used by `aws-lambda-runtime` but built into our custom runtime together. |
+| `/build-bootstrap-out/`                     | Scripts for building the runtime to a zip file.                                        |
+| `/handler/`                                 | Some examples of AWS Lambda functions in Lisp.                                         |
 
 # How to use
 
@@ -86,7 +86,7 @@ This Dockerfile does following:
 1. starts with the original amazonlinux.
 1. Gets SBCL from the official repository, and installs it. (I've tried `yum` of amazonlinux, but it does not have sbcl.)
 3. Gets quicklisp and install it.
-4. Gets and installs some libraries needed by `aws-custom-runtime`, `aws-lambda-function-util`, and `aws-lambda-runtime-builtin-libraries`..
+4. Gets and installs some libraries needed by `aws-custom-runtime`, `aws-lambda-function-util`, and `aws-lambda-runtime-additional-libraries`..
 
 ### Build a Docker VM.
 
@@ -278,6 +278,7 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 - renaming
   - やっぱり test ってつけ戻そうかね
   - builtin -> include??
+- Use keep-alive socket.
 
 ## 2019-02-15
 

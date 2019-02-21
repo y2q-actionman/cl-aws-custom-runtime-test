@@ -17,6 +17,7 @@
 				 :type (pathname-type fasl)
 				 :defaults output-directory)
      do (cl-fad:copy-file fasl to-path :overwrite t)))
+;;; Should I use `(asdf:apply-output-translations ".")' ?
 
 (defun load-fasls-in-directory (pathname)
   (let ((fasls (directory (make-pathname :name :wild
