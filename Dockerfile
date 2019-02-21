@@ -29,6 +29,12 @@ RUN curl -s -f -O "https://beta.quicklisp.org/quicklisp.lisp" \
 # Assign WORKDIR as a local repository
 RUN echo "(push #P\"/work/\" ql:*local-project-directories*)" >>$HOME/.sbclrc
 
+# install some additional libs
+COPY aws-lambda-runtime-builtin-libraries /work/aws-lambda-runtime-builtin-libraries/
+RUN /usr/local/bin/sbcl --non-interactive \
+	--eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)" \
+	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
+
 # 'aws-lambda-function-util'
 COPY aws-lambda-function-util /work/aws-lambda-function-util/
 RUN /usr/local/bin/sbcl --non-interactive \
@@ -39,10 +45,4 @@ RUN /usr/local/bin/sbcl --non-interactive \
 COPY aws-lambda-runtime /work/aws-lambda-runtime/
 RUN /usr/local/bin/sbcl --non-interactive \
 	--eval "(ql:quickload '#:aws-lambda-runtime)" \
-	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
-
-# install some additional libs
-COPY aws-lambda-runtime-builtin-libraries /work/aws-lambda-runtime-builtin-libraries/
-RUN /usr/local/bin/sbcl --non-interactive \
-	--eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)" \
 	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
