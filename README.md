@@ -261,6 +261,7 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 - (DONE) Moved `build-monolithic-fasl` and fasl loaders.
 - (DONE) Changed Dockerfile to include aws-lambda-runtime related codes.
 - (DONE) List up ql builtin libs after building binary.
+- (DONE) rename `aws-lambda-runtime-builtin-libraries` to `aws-lambda-runtime-additional-libraries`
 
 - Updated roswell script reader.
   - (DONE) Uses the last package if 'main' not found.
@@ -273,10 +274,9 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 - add new sample -- ql bundle
 - add new sample -- wcs or jp-numeral
 - new calling convention -- pass stream directly?
-  (select by environmental variable -- `:string`, or `:standard-io`)
+  (select by environmental variable -- `:string`, `:standard-io`, or `:jsown`)
 - add a switch to change `*drakma-default-external-format*`
-- renaming
-  - やっぱり test ってつけ戻そうかね
+- rename
   - builtin -> include??
 - Use keep-alive socket.
 
