@@ -28,7 +28,7 @@ aws lambda delete-function \
 aws lambda create-function \
     --function-name $LAMBDA_FUNC_NAME \
     --zip-file fileb://$ZIP_FILE \
-    --handler "process_with_cl-json.test-parse-handler" \
+    --handler "main.test-parse-handler" \
     --runtime provided \
     --role $LAMBDA_ROLE \
     --layers $LAMBDA_LAYER
