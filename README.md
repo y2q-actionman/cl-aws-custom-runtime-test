@@ -215,9 +215,36 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 	
 # TODO
 
-- Build with JSON libraries?
+## Use a keep-alive socket at getting requests.
 
-  I expect many people will use one of them, consequently!
+For speeding up, use a keep-alive socket at getting requests.
+  
+## At processing requests by a handler, makes a new thread for it.
+
+This reduces latency for getting the next request.  If making a thread
+is too heavy, a kind of producer-consumer pattern can also be
+considered.
+
+## Add a way to change text encoding.
+
+Add a environmental variable to change
+`*drakma-default-external-format*`.
+
+## Add other calling conventions for handlers.
+
+Currently I get the whole body of request as a string and pass it to
+the handler.  But, Drakma has a way to get a stream containing the
+body of requests. so I thought passing the stream to handlers is one
+way.
+(If I implement this feature, I'll bind the stream to
+`*standard-input*`, like the convention for scripts.)
+
+Additionally, I think I want to follow [@windymelt's lambda-over-lambda](https://github.com/windymelt/lambda-over-lambda/blob/a4a074787009f36c0ea2a4853c0890c13f976a55/templates/template.ros#L50) convention, it uses `jsown`.
+  
+(I'll use environmental variables for selecting conventions;
+`:string`, `:standard-io`, or `:jsown`.)
+
+## Add cl-launch script support
 
 # References
 
@@ -262,23 +289,14 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 - (DONE) Changed Dockerfile to include aws-lambda-runtime related codes.
 - (DONE) List up ql builtin libs after building binary.
 - (DONE) rename `aws-lambda-runtime-builtin-libraries` to `aws-lambda-runtime-additional-libraries`
-
-- Updated roswell script reader.
+- (DONE) Updating roswell script reader.
   - (DONE) Uses the last package if 'main' not found.
   - (DONE) small fake roswell runtime, removed Roswell itself from VM and runtime.
   - (DONE) change calling convention; use `*standard-input*` and a special value.
-
-  - 特にidea もないので先駆者兄貴に従う? https://github.com/windymelt/lambda-over-lambda/blob/a4a074787009f36c0ea2a4853c0890c13f976a55/templates/template.ros#L50
+- (DONE) Build with JSON libraries?
   
-- Add cl-launch script support
 - add new sample -- ql bundle
 - add new sample -- wcs or jp-numeral
-- new calling convention -- pass stream directly?
-  (select by environmental variable -- `:string`, `:standard-io`, or `:jsown`)
-- add a switch to change `*drakma-default-external-format*`
-- rename
-  - builtin -> include??
-- Use keep-alive socket.
 
 ## 2019-02-15
 
