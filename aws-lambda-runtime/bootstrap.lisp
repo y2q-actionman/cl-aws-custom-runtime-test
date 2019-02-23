@@ -3,6 +3,10 @@
 
 (in-package :aws-lambda-runtime)
 
+(defvar *HEADER-ALIST* nil
+  "Bound to AWS-Lambda contexts provided by http headers.")
+
+
 (defun make-next-invocation-path (&optional out)
   "Makes an URI for getting a next event."
   (format out "http://~A/2018-06-01/runtime/invocation/next"
@@ -79,7 +83,8 @@ two arg (the event and HTTP headers), and send HANDLER's result back."
        (let ((request-id (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))))
 	 (setf (fill-pointer path-buffer) 0)
 	 (handler-case
-	     (let ((response (funcall handler body headers)))
+	     (let* ((*HEADER-ALIST* headers)
+		    (response (funcall handler body headers)))
 	       (make-invocation-response-path request-id path-buffer)
 	       (drakma:http-request path-buffer
 				    :method :POST

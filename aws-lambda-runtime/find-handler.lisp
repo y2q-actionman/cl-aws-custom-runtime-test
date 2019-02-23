@@ -60,9 +60,6 @@ This package provides `ros:ensure-asdf' symbol, for loading a ros script."
 		   ;; Use the last `*package*' changed by `eval'.
 		   (find-symbol main-symbol-name)))))
 
-(defvar *HEADER-ALIST* nil
-  "Bound to AWS-Lambda contexts provided by http headers.")
-
 (defun wrap-script-main-to-aws-lambda-convention (function)
   "Wraps the main function of scripts to follow calling convensions
  described in docstrings of `find-handler'."
