@@ -11,12 +11,18 @@
   (mapcan #'ql-dist:installed-systems dists))
 
 (defun build-monolithic-fasl (system-name output-directory)
+  (unless (cl-fad:directory-pathname-p output-directory)
+    (let ((orig (shiftf output-directory
+			(cl-fad:pathname-as-directory output-directory))))
+      (warn "output-directory ~A is not a directory-pathname, considered as ~A"
+	    orig output-directory)))
   (asdf:operate 'asdf:monolithic-compile-bundle-op system-name)
   (loop for fasl in (asdf:output-files 'asdf:monolithic-compile-bundle-op system-name)
      as to-path = (make-pathname :name (pathname-name fasl)
 				 :type (pathname-type fasl)
 				 :defaults output-directory)
-     do (cl-fad:copy-file fasl to-path :overwrite t)))
+     do (cl-fad:copy-file fasl to-path :overwrite t)
+     collect to-path))
 ;;; Should I use `(asdf:apply-output-translations ".")' ?
 
 (defun load-fasls-in-directory (pathname)
