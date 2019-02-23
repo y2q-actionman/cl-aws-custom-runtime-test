@@ -1,15 +1,14 @@
 #!/bin/sh
 
+# These variables are assumed to be passed as environment.
+# - ASD_FILE
+# - ASD_SYSTEM_NAME
+
 THIS_DIR=`dirname $0`
 cd $THIS_DIR
 
-MAIN_LISP_FILE=process_with_cl-json.lisp
-ZIP_FILE=load_other_fasls.zip
-
 sbcl --non-interactive \
      --eval "(ql:quickload :aws-lambda-function-util)" \
-     --load needed_libs.asd \
-     --eval "(ql:quickload :needed-libs)" \
+     --load $ASD_FILE \
+     --eval "(ql:quickload ${ASD_SYSTEM_NAME})" \
      --eval "(aws-lambda-function-util:build-monolithic-fasl :needed-libs \"$THIS_DIR\")"
-
-zip $ZIP_FILE *.fasl $MAIN_LISP_FILE

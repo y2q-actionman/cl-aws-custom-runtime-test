@@ -1,12 +1,16 @@
 #!/bin/bash
 
+cd `dirname $0`
+
 LAMBDA_FUNC_NAME=${LAMBDA_FUNC_NAME:-"simple_handler"}
 LAMBDA_ROLE=${LAMBDA_ROLE:-""}
 LAMBDA_LAYER=${LAMBDA_LAYER:-""}
+ZIP_FILE=$LAMBDA_FUNC_NAME.zip
 
-ZIP_FILE=simple_handler.zip
+zip -u $ZIP_FILE *.lisp
 
-zip $ZIP_FILE simple_handler.lisp
+aws lambda delete-function \
+    --function-name $LAMBDA_FUNC_NAME
 
 aws lambda create-function \
     --function-name $LAMBDA_FUNC_NAME \

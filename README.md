@@ -35,6 +35,8 @@ This is an example for using SBCL as a custom runtime on AWS lambda.
 2. Write your code as a AWS Lambda function.
 3. Run!
 
+# Build and publish a custom runtime.
+
 ## About codes in `/aws-lambda-runtime/`
 
 (This section explains my cunstom runtime implementation.  If you just want to make a AWS Lambda function, please skip!)
@@ -77,10 +79,10 @@ It does not work because there are no environmental variables or HTTP endpoints 
 
 Let's build a new custom runtime on Amazon Linux environment.
 
-All building process is written in `build_all.sh` file.
+All building process is written in `build_and_publish_custom_runtime.sh` file.
 In this section, I'll explain what the script does.
 
-### Make a Dockerfile.
+### About the Dockerfile.
 
 `build-bootstrap/Dockerfile` is a definition of buiding environment.
 This Dockerfile does following:
@@ -97,7 +99,7 @@ To build a Docker VM named `test`, do following:
 ``` shell
 docker build -t test .
 ```
-(this is a part of `build_all.sh`)
+(this is a part of `build_and_publish_custom_runtime.sh`)
 
 ### Build a AWS custom runtime.
 
@@ -112,7 +114,7 @@ docker run --rm \
        -v `pwd`/build-bootstrap-out:/out \
        test /out/build_bootstrap_in_vm.sh
 ```
-(this is a part of `build_all.sh`)
+(this is a part of `build_and_publish_custom_runtime.sh`)
 
 This code starts the VM and calls `build-bootstrap-out/build_bootstrap_in_vm.sh`.
 This script does following:
@@ -128,7 +130,7 @@ After that, `aws_lambda_bootstrap.zip` will be made.
 (Additionaly, this script makes a text file lists built-in libraries.
 This is only for provide some information to writers of AWS Lambda function.
 
-### Publish is as a AWS Lambda's custom function layer.
+### Publish it is as a AWS Lambda's custom function layer.
 
 Upload the zip as a AWS Lambda's layer.
 
@@ -137,21 +139,20 @@ aws lambda publish-layer-version \
     --layer-name lisp-layer \
     --zip-file fileb://aws_lambda_bootstrap.zip
 ```
-(this is a part of `build_all.sh`)
-
+(this is a part of `build_and_publish_custom_runtime.sh`)
 
 (TODO: Add a screenshot!)
 
 
-## Makes a AWS Lambda function using Lisp.
+# Makes a AWS Lambda function using Lisp.
 
 (stub. I am currently writing it.)
 
-### Example 1 : most simple one.
+## Example 1 : most simple one.
 
 (stub. Please see `handler/01_simple_handler/`)
 
-### Example 2 : ships with other libraries.
+## Example 2 : ships with other libraries.
 
 (stub. Please see `handler/02_load_other_fasls/`)
 
@@ -159,11 +160,11 @@ aws lambda publish-layer-version \
 - variant 2 : only one big fasl.
 - variant 3 : ql-bundle
 
-### Example 3 : Using a roswell script
+## Example 3 : Using a roswell script
 
 (stub. Please see `handler/03_roswell_script_text/`)
 
-### How to get AWS-lambda contexts.
+## How to get AWS-lambda contexts.
 
 AWS-lambda contexts come into two parts.
 
@@ -191,7 +192,7 @@ AWS-lambda contexts come into two parts.
        (:CONNECTION . "close"))
 ```
 
-### Where to place new libraries?
+## Where to place new libraries?
 
 - Build a new runtime with libraries
 
