@@ -42,7 +42,7 @@ RUN /usr/local/bin/sbcl --non-interactive \
 	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
 
 # install some additional libs
-COPY aws-lambda-runtime-builtin-libraries /work/aws-lambda-runtime-builtin-libraries/
+COPY aws-lambda-runtime-additional-libraries /work/aws-lambda-runtime-additional-libraries/
 RUN /usr/local/bin/sbcl --non-interactive \
-	--eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)" \
+	--eval "(ql:quickload '#:aws-lambda-runtime-additional-libraries)" \
 	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"

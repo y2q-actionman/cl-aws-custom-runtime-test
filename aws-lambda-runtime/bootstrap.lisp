@@ -51,6 +51,7 @@ two arg (the event and HTTP headers), and send HANDLER's result back."
 	    (format *debug-io* "retrying by ~A" e)
 	    (go next-invocation)))
      (multiple-value-bind (body status headers)
+	 ;; TODO: Catch stream here, to other calling conventions.
 	 (handler-case
 	     (drakma:http-request next-invocation-path)
 	   #+sbcl
@@ -74,6 +75,7 @@ two arg (the event and HTTP headers), and send HANDLER's result back."
 	 (500  ; runtime-api spec says 'Runtime should exit promptly.'
 	  (error "next-invocation API returned 500. aborted.")))
        ;; Process the request.
+       ;; TODO: Create a new thread here to fetch next request fastly.
        (let ((request-id (cdr (assoc :Lambda-Runtime-Aws-Request-Id headers))))
 	 (setf (fill-pointer path-buffer) 0)
 	 (handler-case

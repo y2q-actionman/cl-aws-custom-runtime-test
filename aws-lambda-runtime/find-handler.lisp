@@ -66,9 +66,10 @@ This package provides `ros:ensure-asdf' symbol, for loading a ros script."
 (defun wrap-script-main-to-aws-lambda-convention (function)
   "Wraps the main function of scripts to follow calling convensions
  described in docstrings of `find-handler'."
-  (lambda (*standard-input* *HEADER-ALIST*)
-    (with-output-to-string (*standard-output*)
-      (funcall function))))
+  (lambda (string *HEADER-ALIST*)
+    (with-input-from-string (*standard-input* string)
+      (with-output-to-string (*standard-output*)
+	(funcall function)))))
 
 (defun find-handler-from-roswell-script (handler-string)
   "Tries to find a handler from a ros script name.

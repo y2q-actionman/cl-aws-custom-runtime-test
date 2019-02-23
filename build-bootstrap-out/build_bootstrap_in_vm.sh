@@ -14,7 +14,7 @@ BIN_NAME="bootstrap"
 /usr/local/bin/sbcl \
     --non-interactive \
     --eval "(ql:quickload '#:aws-lambda-function-util)" \
-    --eval "(ql:quickload '#:aws-lambda-runtime-builtin-libraries)" \
+    --eval "(ql:quickload '#:aws-lambda-runtime-additional-libraries)" \
     --eval "(ql:quickload '#:aws-lambda-runtime)" \
     --eval "(with-open-file (stream \"/out/installed-libs.txt\" :direction :output :if-exists :supersede) \
     	   		    (pprint (aws-lambda-function-util:list-installed-systems) stream))" \
