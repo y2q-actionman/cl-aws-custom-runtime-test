@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-LAMBDA_FUNC_NAME=${LAMBDA_FUNC_NAME:-"load_other_fasls"}
+LAMBDA_FUNC_NAME=${LAMBDA_FUNC_NAME:-"load_another_fasl"}
 LAMBDA_ROLE=${LAMBDA_ROLE:-""}
 LAMBDA_LAYER=${LAMBDA_LAYER:-""}
 ZIP_FILE=$LAMBDA_FUNC_NAME.zip

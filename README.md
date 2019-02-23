@@ -148,25 +148,17 @@ aws lambda publish-layer-version \
 
 (stub. I am currently writing it.)
 
-## Example 1 : most simple one.
+## About 'handler' settings ans calling convensions.
 
-(stub. Please see `handler/01_simple_handler/`)
+(stub.)
 
-## Example 2 : ships with other libraries.
+1. AWS Lambda's standard syntax
+2. A script name.
+3. A Lisp form.
 
-(stub. Please see `handler/02_load_other_fasls/`)
+### How to get AWS-lambda contexts.
 
-- variant 1 : with one fasl.
-- variant 2 : only one big fasl.
-- variant 3 : ql-bundle
-
-## Example 3 : Using a roswell script
-
-(stub. Please see `handler/03_roswell_script_text/`)
-
-## How to get AWS-lambda contexts.
-
-AWS-lambda contexts come into two parts.
+AWS-lambda contexts come from two parts.
 
 1. Environmental variables.
 
@@ -192,7 +184,29 @@ AWS-lambda contexts come into two parts.
        (:CONNECTION . "close"))
 ```
 
-## Where to place new libraries?
+## Example 1 : most simple one.
+
+(stub. Please see `handler/01_simple_handler/`)
+
+## Example 2 : Using scripts.
+
+(stub. Please see `handler/02_01_roswell_script_text/`)
+
+## Example 3 : ships with other libraries.
+
+### A lisp file and one fasl contains libraries.
+
+(stub. Please see `handler/03_01_load_another_fasl/`)
+
+### One big fasl.
+
+(stub.)
+
+### Using `ql-bundle`.
+
+(stub.)
+
+### Where to place new libraries?
 
 - Build a new runtime with libraries
 
