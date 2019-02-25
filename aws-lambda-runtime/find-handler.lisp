@@ -1,27 +1,17 @@
 (in-package :aws-lambda-runtime)
 
-(defun string-prefix-p (prefix string)
-  "Returns non-nil value when STRING starts with PREFIX."
-  (string= prefix string
-	   :end2 (length prefix)))
-
-(defun string-suffix-p (suffix string)
-  "Returns non-nil value when STRING ends with SUFFIX."
-  (string= suffix string
-	   :start2 (- (length string) (length suffix))))
-
 (defun find-handler-from-aws-standard-format (handler-string)
   "Tries to find a handler by AWS Lambda's standard format.
  See `find-handler''s docstring"
   (let* ((dot-pos (position #\. handler-string))
-	 (file-name (subseq handler-string 0 dot-pos))
-	 (symbol-name (subseq handler-string (1+ dot-pos))))
+	 (file-name (subseq handler-string 0 dot-pos)))
     (when (equal "" file-name)
-      (error "AWS standard format handler does not contains filename: ~A"
+      (error "AWS standard format handler \"~A\" does not contains filename"
 	     handler-string))
     (with-standard-io-syntax
       (load file-name)
-      (ensure-function (read-from-string symbol-name)))))
+      (ensure-function
+       (read-from-string handler-string nil nil :start (1+ dot-pos))))))
 
 (defun ensure-roswell-runtime ()
   "Ensures a package named 'ros' existence, for loading a ros script.
@@ -40,8 +30,8 @@ If such a package does not exist, a package named
     ros-package))
 
 (defun load-script-body (stream &optional (main-symbol-name "MAIN"))
-  "Loads a forms read from STREAM and returns the main symbol."
-  ;; This function is splied, for supporting cl-launch after.
+  "Evaluate Lisp forms from STREAM and returns the main symbol."
+  ;; This function is splited, for supporting cl-launch after.
   (loop with main-symbol = nil
      for form = (read stream nil 'eof)
      until (eq form 'eof)
@@ -73,7 +63,7 @@ See `find-handler''s docstring."
 	  (with-open-file (in handler-string)
 	    (with-standard-io-syntax
 	      (let ((first-line (read-line in))) ; skip the first line.
-		(assert (string-prefix-p "#!" first-line)
+		(assert (starts-with-subseq "#!" first-line)
 			() "No shebang in the roswell script: ~A" in)
 		(load-script-body in)))))
 	 (func (ensure-function main)))
@@ -99,10 +89,10 @@ HANDLER-STRING is read as following:
 * AWS Lambda's standard format: \"<file>.<method>\"
 
   Tries to `cl:load' the <file> and find a symbol denoted by <method>.
-  <method> is read as a symbol. If no package marker, it is read in
-  the `CL-USER' package. The symbol will be called with two args
-  (request data and headers) and its return value will be returned as
-  AWS Lambda function.
+  <method> is read in the standard syntax. (If no package marker, it
+  is read in the `CL-USER' package.) The symbol will be called with
+  two args (request data and headers) and its return value will be
+  returned as AWS Lambda function's return value.
 
 * A script file name. (currently, only for roswell scripts.)
 
@@ -133,8 +123,8 @@ HANDLER-STRING is read as following:
 		;; If contains '()', I assume it is a Lisp form.
 		thereis (member c '(#\( #\)))))))
     (cond ((and (not lisp-like?)
-		(string-suffix-p ".ros" handler-string)
-		(probe-file handler-string))
+		(probe-file handler-string)
+		(ends-with-subseq ".ros" handler-string))
 	   (find-handler-from-roswell-script handler-string))
 	  ((and (not lisp-like?)
 		(find #\. handler-string))

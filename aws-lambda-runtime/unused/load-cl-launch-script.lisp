@@ -19,8 +19,8 @@
   (let ((cmd-lines (split-sequence:split-sequence " " first-line)))
     (loop for cmd = (pop cmd-lines)
        while cmd-lines
-       if (or (and (string-prefix-p "#!" cmd)
-		   (string-suffix-p "cl" cmd))
+       if (or (and (starts-with-subseq "#!" cmd)
+		   (ends-with-subseq "cl" cmd))
 	      (string= cmd "cl-launch"))
        do (loop-finish))
     (loop with restart = nil
@@ -90,7 +90,7 @@ See `find-handler''s docstring."
     (with-open-file (in handler-string)
       (with-standard-io-syntax
 	(let ((first-line (read-line in)))
-	  (unless (or (string-prefix-p "#!/usr/bin/cl" first-line)
+	  (unless (or (starts-with-subseq "#!/usr/bin/cl" first-line)
 		      (search "cl-launch" first-line))
 	    (error "Unknown file type: ~A" handler-string))
 	  (setf (values entry restart)

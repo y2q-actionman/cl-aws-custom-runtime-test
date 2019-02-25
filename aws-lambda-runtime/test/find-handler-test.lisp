@@ -2,14 +2,6 @@
 
 (in-package :aws-lambda-runtime)
 
-;; string-suffix-p
-
-(assert (string-prefix-p "#!" "#!/bin/bash"))
-(assert (not (string-prefix-p "#!" " #!/bin/sh")))
-
-(assert (string-suffix-p ".ros" "hoge.ros"))
-(assert (not (string-suffix-p ".ros" "hoge.ros.bak")))
-
 ;; AWS syntax pattern
 
 (with-open-file (out "./hoge.lisp" :direction :output :if-exists :supersede)
