@@ -300,7 +300,7 @@ An example using a fasl is in  **handler/03_01_load_another_fasl/**.
 
 [upload_function.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/01_simple_handler/upload_function.sh) does three works:
 
-1. Makes a monolithic fasl from **needed-libs-example.asd**, using [build_fasl_in_vm.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/03_01_load_another_fasl/build_fasl_in_vm.sh) in **cl-aws-buildenv** VM and . (In this phase, you must build fasl with this VM. Without this, [FASL error will be raised]((https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/fasl_error.png)).)
+1. Makes a monolithic fasl from **needed-libs-example.asd**, using [build_fasl_in_vm.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/03_01_load_another_fasl/build_fasl_in_vm.sh) in **cl-aws-buildenv** VM and . (In this phase, you must build fasl with this VM. Without this, [FASL error will be raised](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/fasl_error.png).)
 2. Make a zip file containing the fasl and *main.lisp* file.
 3. Upload it as a AWS Lambda function.
 
@@ -335,11 +335,11 @@ There are in **handler/03_02_one_big_fasl//**.
 
 # Known problems
 
-- EPERM
+I sometimes saw `EPERM` on poll(2). [Screenshot is here](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/EPERM_on_poll.png).
+I don't now what causes this, but I noticed that retrying to get requests works well. [This code](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/9d548a8db5dcd7399818bf8f25a08920c7bc48d1/aws-lambda-runtime/bootstrap.lisp#L63) is written for this, but I want to know how to fix it correctly.
 
-	IPv6?
-	poll(2)?
-	
+(@windymelt suggested `EPERM` is caused by IPv6 socket, referring to [Erlang's case.](https://blog.marshallbrekka.com/post/2016-06-10/erlang-on-aws-lambda/).  [In his article (Japanese)](https://blog.3qe.us/entry/2019/02/06/013916), he tried to drop IPv6 support and made a working custom runtime with Clozure CL. I wrote codes for this case with SBCL ([unused/usocket-patch-drop-ipv6.lisp](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime/unused/usocket-patch-drop-ipv6.lisp)), but failed to work. I thought that if IPv6 effects, `EPERM` should be reported by socket(2), not poll(2).)
+
 # TODO
 
 ## Use a keep-alive socket at getting requests.
