@@ -87,17 +87,17 @@ In this section, I'll explain what the script does.
 `build-bootstrap/Dockerfile` is a definition of buiding environment.
 This Dockerfile does following:
 
-1. starts with the original amazonlinux.
-1. Gets SBCL from the official repository, and installs it. (I've tried `yum` of amazonlinux, but it does not have sbcl.)
-3. Gets quicklisp and install it.
-4. Gets and installs some libraries needed by `aws-custom-runtime`, `aws-lambda-function-util`, and `aws-lambda-runtime-additional-libraries`..
+1. It starts with the amazonlinux.
+2. It gets SBCL from the official repository, and installs it. (I've tried `yum` of amazonlinux, but it does not have sbcl.)
+3. It gets Quicklisp and install it.
+4. It copies runtime sources (`aws-lambda-runtime`, `aws-lambda-function-util`, and `aws-lambda-runtime-additional-libraries`), and install them with some libraries fetched via Quicklisp.
 
 ### Build a Docker VM.
 
-To build a Docker VM named `test`, do following:
+To build a Docker VM named `cl-aws-buildenv`, do following:
 
 ``` shell
-docker build -t test .
+docker build -t cl-aws-buildenv .
 ```
 (this is a part of `build_and_publish_custom_runtime.sh`)
 
@@ -112,7 +112,7 @@ Here, what you to do is:
 ``` shell
 docker run --rm \
        -v `pwd`/build-bootstrap-out:/out \
-       test /out/build_bootstrap_in_vm.sh
+       cl-aws-buildenv /out/build_bootstrap_in_vm.sh
 ```
 (this is a part of `build_and_publish_custom_runtime.sh`)
 
@@ -200,7 +200,7 @@ AWS-lambda contexts come from two parts.
 
 ### One big fasl.
 
-(stub.)
+(stub. Please see `handler/03_02_one_big_fasl/`)
 
 ### Using `ql-bundle`.
 

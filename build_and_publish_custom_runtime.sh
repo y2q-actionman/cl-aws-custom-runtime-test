@@ -3,7 +3,7 @@
 cd `dirname $0`
 
 # build a VM.
-VM_NAME="test"
+VM_NAME="cl-aws-buildenv"
 docker build -t $VM_NAME .
 
 # make a zip file.
