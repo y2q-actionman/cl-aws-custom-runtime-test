@@ -141,21 +141,37 @@ aws lambda publish-layer-version \
 ```
 (this is a part of `build_and_publish_custom_runtime.sh`)
 
+This command makes a new AWS custom runtime layer, named **lisp-layer**.
+
 After that, the custom layer is uploaded like this image:
 ![AWS lambda lisp-layer](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/lambda_layer.png)
 (Because I debugged and updated the layer many times, its version is 23!)
 
 # Makes a AWS Lambda function using Lisp.
 
-(stub. I am currently writing it.)
+Using the **lisp-layer**, you can run any Lisp codes in AWS Lambda.
+In this section, I explain this runtime's calling conventions and show some examples.
 
-## About 'handler' settings ans calling convensions.
+## Calling Conventions
 
-(stub.)
+### How to find the entry point.
 
-1. AWS Lambda's standard syntax
-2. A script name.
-3. A Lisp form.
+The entry point of your AWS lambda functions is specified by 'handler' parameter.
+This custom runtime reads this parameter as following:
+
+#### AWS Lambda's [standard syntax](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html) : `<file>.<method>`.
+
+The `file` is loaded by `cl:load`, and `method` is read as a symbol and `funcall`'ed for every request.
+The symbol is `funcall`'ed with two arguments, request data and HTTP headers, and its return value will be returned as AWS Lambda function's return value.
+
+#### A script file name.
+
+In this case, 'handler' parameter is considered as a file name. The file is loaded, and its *main* function is called with no arguments.
+When *main* is called, `*standard-input*` is bound to the request, `aws-lambda-runtime:*HEADER-ALIST*` is bound to HTTP headers, and strings written to `*standard-output*` are used as AWS-Lambda's result.
+
+#### other patterns
+
+For more information, please see [`aws-lambda-runtime:find-handler`'s docstring](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime/find-handler.lisp#L85)
 
 ### How to get AWS-lambda contexts.
 
@@ -163,15 +179,18 @@ AWS-lambda contexts come from two parts.
 
 1. Environmental variables.
 
-  They are held in varibles exported by `aws-lambda-runtime` package.
+  They are bound to special varibles in `aws-lambda-runtime` package.
   Please see _lambda-env-vars.lisp_.
   
-2. Http headers.
+2. HTTP headers.
 
-   They are passed into the second argument of your handler function
-   as an alist (because I uses `Drakma`.)
+   They are bound to `aws-lambda-runtime:*HEADER-ALIST*` as an alist
+   (because I uses `Drakma`.)
    
-   Example:
+   In addition, when AWS Lambda's standard syntax is used at 'handler',
+   it is passed at the second argument of your handler function.
+   
+   HTTP header example:
 ```lisp
     ((:CONTENT-TYPE . "application/json")
        (:LAMBDA-RUNTIME-AWS-REQUEST-ID
@@ -185,9 +204,33 @@ AWS-lambda contexts come from two parts.
        (:CONNECTION . "close"))
 ```
 
-## Example 1 : most simple one.
+## Example 1 : A simple one.
 
-(stub. Please see `handler/01_simple_handler/`)
+A simple example is in  **handler/01_simple_handler/**.
+
+[simple_handler.lisp](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/01_simple_handler/simple_handler.lisp) file contains `simple-handler` function. It will be called.
+
+[upload_function.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/01_simple_handler/upload_function.sh) upload it with two steps:
+
+1. make a zip file containing the *simple_handler.lisp* file.
+2. Upload it as a AWS Lambda function.
+
+At uploading, I specify `--runtime` and `--layers` parameter. to use the **lisp-layer** runtime.
+
+And I used '--handler' parameter like this:
+
+```
+    --handler "simple_handler.cl-user::simple-handler"
+```
+
+It is AWS Lambda's standard syntax. This says "Load `simple_handler`, and call `cl-user::simple-handler` for each request."
+
+After uploading, the new AWS Lambda function looks like this:
+![uploaded simple handler screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/simple_handler_uploaded.png)
+(Thanks to AWS Lambda console, you can edit your code in it.)
+
+I run it with the console's test:
+![executed test in simple handler screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/simple_handler_executed.png)
 
 ## Example 2 : Using scripts.
 
