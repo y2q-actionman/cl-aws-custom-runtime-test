@@ -261,33 +261,77 @@ And I change 'handler' to `echo.ros` and run it again.
 ![executed echo.ros screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/ros_handler_exec_echo.png)
 `echo.ros` copies the request to the response, this screenshot looks so.
 
-## Example 3 : ships with other libraries.
+## Example 3 : Ships with other libraries.
 
 ### Where to place new libraries?
 
-- Build a new runtime with libraries
+I decided to build this custom runtime [with some JSON libs](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime-additional-libraries/aws-lambda-runtime-additional-libraries.asd). But this is obviously short of real programming.
+So, I consider how to ship my code with other libraries. I think there some ways:
 
-Pros: Simpler AWS-lambda function codes, faster startup.
-Cons: You must manage many runtimes.
+1. Build a new runtime with libraries.
 
-- Ships AWS-lambda function codes with a built FASL.
+Re-building a new runtime with wanted libraries.
 
-Pros: You can share runtimes with other AWS-lambda functions.
-Cons: Slower Startup. AWS-lambda function codes must `load` it.
+It makes handler codes simpler and faster at starting up.
+But you must manage many AWS custom function layers.
 
-- Use ql-bundle
+2. Ships AWS-lambda function codes with a built FASL.
 
-(TODO: make a new example)
+Making a FASL with wanted libraries, and ships a lisp file with the FASL.
+
+In this approach, you can share same runtimes in many AWS Lambda functions.
+But this makes startup slower, and the handler file must `load` the FASL correctly.
+
+I wrote an example for this case.
+
+3. Makes a single FASL contains all.
+
+This is a variant of second approach. Making a FASL with wanted libraries *AND* handler definitions.
+
+4. Use `ql-bundle`
+
+I've not tried this, but I think it is good.
 
 ### A lisp file and one fasl contains libraries.
 
-(stub. Please see `handler/03_01_load_another_fasl/`)
+An example using a fasl is in  **handler/03_01_load_another_fasl/**.
+
+[needed-libs-example.asd](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/03_01_load_another_fasl/needed-libs-example.asd) file defines a `defsystem` for making FASL with wanted libraries. In this example, I used [`jp-numeral`](https://github.com/y2q-actionman/jp-numeral) (A joke lib converts integers to Japanese numerals.)
+
+[upload_function.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/01_simple_handler/upload_function.sh) does three works:
+
+1. Makes a monolithic fasl from **needed-libs-example.asd**, using [build_fasl_in_vm.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/03_01_load_another_fasl/build_fasl_in_vm.sh) in **cl-aws-buildenv** VM and . (In this phase, you must build fasl with this VM. Without this, [FASL error will be raised]((https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/fasl_error.png)).)
+2. Make a zip file containing the fasl and *main.lisp* file.
+3. Upload it as a AWS Lambda function.
+
+In [main.lisp](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/03_01_load_another_fasl/main.lisp) file, [it loads the built fasl at load time](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/03_01_load_another_fasl/main.lisp#L4).
+
+I specifies `--handler` like this:
+
+```
+    --handler "main.test-parse-handler"
+```
+
+Because of this, this runtime does below at start:
+
+1. Loads main.lisp file.
+2. At loading it, the build fasl will be loaded.
+3. Uses `test-parse-handler` for handling requests.
+
+After uploading, the new AWS Lambda function looks like this:
+![uploaded load-another-fasl screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_uploaded.png)
+
+I changed test data for using integers:
+![load-another-fasl test screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_test.png)
+
+And run it:
+![load-another-fasl exec screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_exec.png)
+It seems I successed to use another library.
 
 ### One big fasl.
 
-(stub. Please see `handler/03_02_one_big_fasl/`)
-
-
+I wrote another example, which makes a big fasl with libraries AND handler codes.
+There are in **handler/03_02_one_big_fasl//**.
 
 # Known problems
 
@@ -327,7 +371,7 @@ Additionally, I think I want to follow [@windymelt's lambda-over-lambda](https:/
 (I'll use environmental variables for selecting conventions;
 `:string`, `:standard-io`, or `:jsown`.)
 
-## Add `ql-bundle` example.
+## Add ql-bundle example.
 
 ## Add cl-launch script support.
 
