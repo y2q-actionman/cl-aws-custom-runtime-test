@@ -217,7 +217,7 @@ A simple example is in  **handler/01_simple_handler/**.
 
 At uploading, I specify `--runtime` and `--layers` parameter. to use the **lisp-layer** runtime.
 
-And I used '--handler' parameter like this:
+And I used `--handler` parameter like this:
 
 ```
     --handler "simple_handler.cl-user::simple-handler"
@@ -234,21 +234,34 @@ I run it with the console's test:
 
 ## Example 2 : Using scripts.
 
-(stub. Please see `handler/02_01_roswell_script_text/`)
+An example using roswell scripts is in  **handler/02_01_roswell_script_text/**.
+
+I wrote these scripts:
+
+- [empty.ros](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/02_01_roswell_script_text/empty.ros) does nothing. (It is only for testing.) 
+- [hello.ros](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/02_01_roswell_script_text/hello.ros) prints "Hello, World" message.
+- [echo.ros](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/02_01_roswell_script_text/echo.ros) returns the request as-is.
+
+[upload_function.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/02_01_roswell_script_text/upload_function.sh) works like *simple-handler*'s one, except zips these **.ros** files, and specifies `--handler` like this:
+
+```
+    --handler "hello.ros"
+```
+
+It is script-file syntax. This says "Load `hello.ros`, and call its `main` function for each request."
+
+After uploading, the new AWS Lambda function looks like this:
+![uploaded ros handler screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/ros_handler_uploaded.png)
+I can see three ros files.
+
+I run it with the console's test:
+![executed hello.ros screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/ros_handler_exec_hello.png)
+
+And I change 'handler' to `echo.ros` and run it again.
+![executed echo.ros screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/ros_handler_exec_echo.png)
+`echo.ros` copies the request to the response, this screenshot looks so.
 
 ## Example 3 : ships with other libraries.
-
-### A lisp file and one fasl contains libraries.
-
-(stub. Please see `handler/03_01_load_another_fasl/`)
-
-### One big fasl.
-
-(stub. Please see `handler/03_02_one_big_fasl/`)
-
-### Using `ql-bundle`.
-
-(stub.)
 
 ### Where to place new libraries?
 
@@ -265,6 +278,15 @@ Cons: Slower Startup. AWS-lambda function codes must `load` it.
 - Use ql-bundle
 
 (TODO: make a new example)
+
+### A lisp file and one fasl contains libraries.
+
+(stub. Please see `handler/03_01_load_another_fasl/`)
+
+### One big fasl.
+
+(stub. Please see `handler/03_02_one_big_fasl/`)
+
 
 
 # Known problems
@@ -305,7 +327,9 @@ Additionally, I think I want to follow [@windymelt's lambda-over-lambda](https:/
 (I'll use environmental variables for selecting conventions;
 `:string`, `:standard-io`, or `:jsown`.)
 
-## Add cl-launch script support
+## Add `ql-bundle` example.
+
+## Add cl-launch script support.
 
 # References
 
@@ -377,10 +401,7 @@ Many enhancements:
 
 ## 2018-12-06
 
-https://github.com/y2q-actionman/cl-aws-custom-runtime-test/releases/tag/2018-12-06-cl-advent-calendar
-
-First version. This is only experimental -- does not have any
-error-handling codes. However, quite simple.
+[First version](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/releases/tag/2018-12-06-cl-advent-calendar). This is only experimental -- does not have any error-handling codes. However, quite simple.
 
 Please see [This article (japanese)](http://y2q-actionman.hatenablog.com/entry/2018/12/06/AWS_Lambda_%E3%81%AE_Custom_Runtime_%E3%81%A8%E3%81%97%E3%81%A6_Common_Lisp_%28sbcl%29_%E3%82%92%E4%BD%BF%E3%81%86)
 

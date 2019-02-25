@@ -3,8 +3,12 @@
 cd `dirname $0`
 
 LAMBDA_FUNC_NAME=${LAMBDA_FUNC_NAME:-"ros_script_handler"}
-LAMBDA_ROLE=${LAMBDA_ROLE:-""}
+LAMBDA_ROLE=${LAMBDA_ROLE:-""}	# Please specify your IAM role here.
+
+# Please specify your cunstom runtime layer's ARN.
+# Like: LAMBDA_LAYER="arn:aws:lambda:ca-central-1:************:layer:lisp-layer:23"
 LAMBDA_LAYER=${LAMBDA_LAYER:-""}
+
 ZIP_FILE=$LAMBDA_FUNC_NAME.zip
 
 zip -u $ZIP_FILE *.ros
