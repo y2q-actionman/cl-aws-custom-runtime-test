@@ -23,27 +23,21 @@
       (load file-name)
       (ensure-function (read-from-string symbol-name)))))
 
-(define-constant +roswell-runtime-package-name-list+
-    '(:ros :roswell)
-  :test 'equal
-  :documentation "Package names may be required by roswell scripts.
-This is used by `ensure-fake-roswell-runtime'")
-
-(defun ensure-fake-roswell-runtime ()
-  "Ensures a package named 'fake-roswell-runtime' exists.
-This package provides `ros:ensure-asdf' symbol, for loading a ros script."
-  (let* ((nicknames
-	  (or (remove-if #'find-package +roswell-runtime-package-name-list+)
-	      (return-from ensure-fake-roswell-runtime ; the package already exists.
-		(find-package 'fake-roswell-runtime))))
-	 (fr-package
-	  (make-package 'fake-roswell-runtime :use nil :nicknames nicknames))
-	 (ensure-asdf-sym (intern "ENSURE-ASDF" fr-package)))
-    ;; Roswell's `ros:ensure-asdf' returns T if ASDF was loaded.
-    ;; Because I assume this runtime has ASDF in the Lisp image, I always return T.
-    (setf (symbol-function ensure-asdf-sym) (constantly t))
-    (export ensure-asdf-sym fr-package)
-    fr-package))
+(defun ensure-roswell-runtime ()
+  "Ensures a package named 'ros' existence, for loading a ros script.
+If such a package does not exist, a package named
+'fake-roswell-runtime' is created.  This package provides
+`ros:ensure-asdf' symbol."
+  (let ((ros-package
+	 (or (find-package :ros)
+	     (make-package 'fake-roswell-runtime :use nil :nicknames '(:ros)))))
+    (unless (find-symbol "ENSURE-ASDF" ros-package)
+      (let ((ensure-asdf-sym (intern "ENSURE-ASDF" ros-package)))
+	;; Roswell's `ros:ensure-asdf' returns T if ASDF was loaded.
+	;; Because I assume this runtime has ASDF in the Lisp image, I always return T.
+	(setf (symbol-function ensure-asdf-sym) (constantly t))
+	(export ensure-asdf-sym ros-package)))
+    ros-package))
 
 (defun load-script-body (stream &optional (main-symbol-name "MAIN"))
   "Loads a forms read from STREAM and returns the main symbol."
@@ -71,7 +65,7 @@ This package provides `ros:ensure-asdf' symbol, for loading a ros script."
 (defun find-handler-from-roswell-script (handler-string)
   "Tries to find a handler from a ros script name.
 See `find-handler''s docstring."
-  (ensure-fake-roswell-runtime)
+  (ensure-roswell-runtime)
   (let* ((main
 	  ;; The official loader of roswell script is `roswell:script'
 	  ;; function, but I think that is difficult to use.
