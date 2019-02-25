@@ -1,8 +1,6 @@
 An example of using Common Lisp (sbcl) as a custom runtime on AWS lambda
 ======
 
-(2019-02-15) this README is not completed.
-
 This is an example for using SBCL as a custom runtime on AWS lambda.
 
 # Overview
@@ -335,10 +333,10 @@ There are in **handler/03_02_one_big_fasl//**.
 
 # Known problems
 
-I sometimes saw `EPERM` on poll(2). [Screenshot is here](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/EPERM_on_poll.png).
+I sometimes saw `EPERM` on poll(2) ([Screenshot is here](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/EPERM_on_poll.png)).
 I don't now what causes this, but I noticed that retrying to get requests works well. [This code](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/9d548a8db5dcd7399818bf8f25a08920c7bc48d1/aws-lambda-runtime/bootstrap.lisp#L63) is written for this, but I want to know how to fix it correctly.
 
-(@windymelt suggested `EPERM` is caused by IPv6 socket, referring to [Erlang's case.](https://blog.marshallbrekka.com/post/2016-06-10/erlang-on-aws-lambda/).  [In his article (Japanese)](https://blog.3qe.us/entry/2019/02/06/013916), he tried to drop IPv6 support and made a working custom runtime with Clozure CL. I wrote codes for this case with SBCL ([unused/usocket-patch-drop-ipv6.lisp](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime/unused/usocket-patch-drop-ipv6.lisp)), but failed to work. I thought that if IPv6 effects, `EPERM` should be reported by socket(2), not poll(2).)
+(@windymelt suggested `EPERM` is caused by IPv6 socket, referring to [Erlang's case](https://blog.marshallbrekka.com/post/2016-06-10/erlang-on-aws-lambda/).  [In his article (Japanese)](https://blog.3qe.us/entry/2019/02/06/013916), he tried to drop IPv6 support and made a working custom runtime with Clozure CL. I wrote codes for this case with SBCL ([unused/usocket-patch-drop-ipv6.lisp](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime/unused/usocket-patch-drop-ipv6.lisp)), but failed to work. I thought that if IPv6 effects, `EPERM` should be reported by socket(2), not poll(2).)
 
 # TODO
 
@@ -410,44 +408,24 @@ Additionally, I think I want to follow [@windymelt's lambda-over-lambda](https:/
 
 # History
 
-## 2019-02-21
-
-- (DONE) Move test codes
-- (DONE) Include JSON libs into runtime at build time.
-- (DONE) Moved `build-monolithic-fasl` and fasl loaders.
-- (DONE) Changed Dockerfile to include aws-lambda-runtime related codes.
-- (DONE) List up ql builtin libs after building binary.
-- (DONE) rename `aws-lambda-runtime-builtin-libraries` to `aws-lambda-runtime-additional-libraries`
-- (DONE) Updating roswell script reader.
-  - (DONE) Uses the last package if 'main' not found.
-  - (DONE) small fake roswell runtime, removed Roswell itself from VM and runtime.
-  - (DONE) change calling convention; use `*standard-input*` and a special value.
-- (DONE) Build with JSON libraries?
-  
-- add new sample -- ql bundle
-- add new sample -- wcs or jp-numeral
-
-## 2019-02-15
+## 2019-02-26
 
 Many enhancements:
 
-- (DONE) Trying to fix weird `EPERM` error. (Drop IPv6 support, restarting poll(2), etc.)
-- (DONE) pick all env variables
-- (DONE) invocation error and initialiation error handling (https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html)
-- (DONE) Support new handler type -- AWS Lambda's standard format, and Lisp forms.
-- (DONE) rename to aws-lambda-runtime?
-- (DONE) Fix and move Docker related files
-- (DONE) Roswell script loader.
-- (DONE) Use uiop for getenv.
-- (DONE) New examples: use new `find-handler`.
-- (DONE) New examples: monolithic fasl examples.
-- (DONE) New examples: roswell script.
+- Trying to fix weird `EPERM` error. (Drop IPv6 support, restarting poll(2), etc.)
+- Picks all env variables.
+- invocation error and initialiation error handling (https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html)
+- Support new handler type -- AWS Lambda's standard format, roswell script, and Lisp forms.
+- Include JSON libs into runtime at build time.
+- New examples: monolithic fasl examples.
+- New examples: roswell script.
 
 ## 2018-12-06
 
-[First version](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/releases/tag/2018-12-06-cl-advent-calendar). This is only experimental -- does not have any error-handling codes. However, quite simple.
+[First version is here.](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/releases/tag/2018-12-06-cl-advent-calendar).
+This is only experimental -- does not have any error-handling codes. However, quite simple.
 
-Please see [This article (japanese)](http://y2q-actionman.hatenablog.com/entry/2018/12/06/AWS_Lambda_%E3%81%AE_Custom_Runtime_%E3%81%A8%E3%81%97%E3%81%A6_Common_Lisp_%28sbcl%29_%E3%82%92%E4%BD%BF%E3%81%86)
+About this version, please see [This article (japanese)](http://y2q-actionman.hatenablog.com/entry/2018/12/06/AWS_Lambda_%E3%81%AE_Custom_Runtime_%E3%81%A8%E3%81%97%E3%81%A6_Common_Lisp_%28sbcl%29_%E3%82%92%E4%BD%BF%E3%81%86)
 
 # License
 
