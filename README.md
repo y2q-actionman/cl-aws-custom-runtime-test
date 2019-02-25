@@ -141,8 +141,9 @@ aws lambda publish-layer-version \
 ```
 (this is a part of `build_and_publish_custom_runtime.sh`)
 
-(TODO: Add a screenshot!)
-
+After that, the custom layer is uploaded like this image:
+![AWS lambda lisp-layer](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/lambda_layer.png)
+(Because I debugged and updated the layer many times, its version is 23!)
 
 # Makes a AWS Lambda function using Lisp.
 
