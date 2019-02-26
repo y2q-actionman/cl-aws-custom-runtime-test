@@ -11,6 +11,9 @@ This is an example for using SBCL as a custom runtime on AWS lambda.
 - Normal lisp files, compiled fasls, and Roswell scripts are ready to use.
 - You can use any Lisp libraries (if it built correctly.)
 
+A Screenshot of AWS Lambda function console is here:
+![load-another-fasl exec screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_exec.png)
+
 ## Requirements
 
 - Docker :: For building binaries on AWS lambda environment (aka Amazon Linux). 
