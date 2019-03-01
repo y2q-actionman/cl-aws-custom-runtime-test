@@ -13,6 +13,7 @@ This is an example for using SBCL as a custom runtime on AWS lambda.
 
 A Screenshot of AWS Lambda function console is here:
 ![load-another-fasl exec screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_exec.png)
+<!-- FIXME: use other image! -->
 
 ## Requirements
 
@@ -107,7 +108,7 @@ docker build -t cl-aws-buildenv .
 Here, what you to do is:
 
 1. Start the Docker VM.
-2. In the VM, build our runtime to a single binary named **bootstrap**.
+2. In the VM, build your runtime to a single binary named **bootstrap**.
 3. Makes a zip file contains the **bootstrap** file.
 
 ``` shell
@@ -120,8 +121,8 @@ docker run --rm \
 This code starts the VM and calls `build-bootstrap-out/build_bootstrap_in_vm.sh`.
 This script does following:
 
-1. Loads required libraries and our custom runtime.
-1. Makes a single binary with `sb-ext:save-lisp-and-die` feature.
+1. Load required libraries and our custom runtime.
+1. Make a single binary with `sb-ext:save-lisp-and-die` feature.
    I named it to **bootstrap** and restarts with
    `aws-bootstrap-test:bootstrap`, which is our bootstrap function.
 1. `zip` it.
@@ -129,7 +130,9 @@ This script does following:
 After that, `aws_lambda_bootstrap.zip` will be made.
 
 (Additionaly, this script makes a text file lists built-in libraries.
-This is only for provide some information to writers of AWS Lambda function.
+This is only for provide some information to writers of AWS Lambda function.)
+
+(TODO: I will clean *build_bootstrap_in_vm.sh* by splitting Lisp codes to another file.)
 
 ### Publish it is as a AWS Lambda's custom function layer.
 
@@ -167,16 +170,16 @@ The symbol is `funcall`'ed with two arguments, request data and HTTP headers, an
 
 #### A script file name.
 
-In this case, 'handler' parameter is considered as a file name. The file is loaded, and its *main* function is called with no arguments.
+In this case, 'handler' parameter is considered as a file name. The specified file is loaded, and its *main* function is called with no arguments.
 When *main* is called, `*standard-input*` is bound to the request, `aws-lambda-runtime:*HEADER-ALIST*` is bound to HTTP headers, and strings written to `*standard-output*` are used as AWS-Lambda's result.
 
 #### other patterns
 
 For more information, please see [`aws-lambda-runtime:find-handler`'s docstring](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime/find-handler.lisp#L85)
 
-### How to get AWS-lambda contexts.
+### How to get AWS-Lambda contexts.
 
-AWS-lambda contexts come from two parts.
+AWS-Lambda contexts come from two parts.
 
 1. Environmental variables.
 
@@ -213,7 +216,7 @@ A simple example is in  **handler/01_simple_handler/**.
 
 [upload_function.sh](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/handler/01_simple_handler/upload_function.sh) upload it with two steps:
 
-1. make a zip file containing the *simple_handler.lisp* file.
+1. Make a zip file containing the *simple_handler.lisp* file.
 2. Upload it as a AWS Lambda function.
 
 At uploading, I specify `--runtime` and `--layers` parameter. to use the **lisp-layer** runtime.
@@ -228,7 +231,8 @@ It is AWS Lambda's standard syntax. This says "Load `simple_handler`, and call `
 
 After uploading, the new AWS Lambda function looks like this:
 ![uploaded simple handler screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/simple_handler_uploaded.png)
-(Thanks to AWS Lambda console, you can edit your code in it.)
+
+(Thanks to the AWS-Lambda console, you can edit your code in it!)
 
 I run it with the console's test:
 ![executed test in simple handler screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/simple_handler_executed.png)
@@ -251,32 +255,35 @@ I wrote these scripts:
 
 It is script-file syntax. This says "Load `hello.ros`, and call its `main` function for each request."
 
-After uploading, the new AWS Lambda function looks like this:
+After uploading, the new AWS Lambda function looks like this. You can see three files:
 ![uploaded ros handler screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/ros_handler_uploaded.png)
-I can see three ros files.
 
 I run it with the console's test:
+
 ![executed hello.ros screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/ros_handler_exec_hello.png)
 
 And I change 'handler' to `echo.ros` and run it again.
+
 ![executed echo.ros screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/ros_handler_exec_echo.png)
+(TODO: this screenshot executed 'echo.ros' but still shows 'hello.ros'. I should show 'echo.ros'...)
+
 `echo.ros` copies the request to the response, this screenshot looks so.
 
 ## Example 3 : Ships with other libraries.
 
 ### Where to place new libraries?
 
-I decided to build this custom runtime [with some JSON libs](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime-additional-libraries/aws-lambda-runtime-additional-libraries.asd). But this is obviously short of real programming.
-So, I consider how to ship my code with other libraries. I think there some ways:
+I decided to build this custom runtime [with some JSON libs](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/blob/master/aws-lambda-runtime-additional-libraries/aws-lambda-runtime-additional-libraries.asd). But there are obviously short of real-world programmings.
+So, I consider how to ship my code with other libraries. I think some ways:
 
-1. Build a new runtime with libraries.
+#### Build a new runtime with libraries.
 
 Re-building a new runtime with wanted libraries.
 
 It makes handler codes simpler and faster at starting up.
 But you must manage many AWS custom function layers.
 
-2. Ships AWS-lambda function codes with a built FASL.
+#### Ships AWS-lambda function codes with a built FASL.
 
 Making a FASL with wanted libraries, and ships a lisp file with the FASL.
 
@@ -285,11 +292,11 @@ But this makes startup slower, and the handler file must `load` the FASL correct
 
 I wrote an example for this case.
 
-3. Makes a single FASL contains all.
+#### Makes a single FASL contains all.
 
 This is a variant of second approach. Making a FASL with wanted libraries *AND* handler definitions.
 
-4. Use `ql-bundle`
+#### Use `ql-bundle`
 
 I've not tried this, but I think it is good.
 
@@ -323,10 +330,13 @@ After uploading, the new AWS Lambda function looks like this:
 ![uploaded load-another-fasl screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_uploaded.png)
 
 I changed test data for using integers:
+
 ![load-another-fasl test screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_test.png)
 
 And run it:
+
 ![load-another-fasl exec screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_exec.png)
+
 It seems I successed to use another library.
 
 ### One big fasl.
