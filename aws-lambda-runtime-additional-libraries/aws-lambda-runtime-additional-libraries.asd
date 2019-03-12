@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:aws-lambda-runtime-additional-libraries
   :description "Additional libraries built into the AWS Lambda custom runtime."
-  :license "WTFPL"
+  :license "MIT"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
   :depends-on
   ( ;; Enumerate built-in libraries here.

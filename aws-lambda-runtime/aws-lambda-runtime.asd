@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:aws-lambda-runtime
   :description "Test and proof-of-concept codes for using SBCL on AWS Lambda."
-  :license "WTFPL"
+  :license "MIT"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
   :depends-on (#:alexandria
 	       #:usocket ; comes with drakma

@@ -2,7 +2,7 @@
 
 (asdf:defsystem #:aws-lambda-function-util
   :description "Some utilities for building an AWS Lambda function."
-  :license "WTFPL"
+  :license "MIT"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
   :depends-on (#:cl-fad #:asdf #:quicklisp)
   :components

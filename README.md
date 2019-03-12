@@ -442,6 +442,4 @@ About this version, please see [This article (japanese)](http://y2q-actionman.ha
 
 # License
 
-Copyright (c) 2018,2019 YOKOTA Yuki
-
-This program is free software. It comes without any warranty, to the extent permitted by applicablep law. You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2, as published by Sam Hocevar. See the COPYING file for more details.
+The MIT License. See LICENSE file.
