@@ -1,6 +1,4 @@
-(in-package :cl-user)
-
-(asdf:defsystem #:aws-lambda-runtime-additional-libraries
+(defsystem #:aws-lambda-runtime-additional-libraries
   :description "Additional libraries built into the AWS Lambda custom runtime."
   :license "MIT"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"

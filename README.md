@@ -70,7 +70,7 @@ bootstrap.lisp does almost all tasks as a AWS Lambda's custom runtime.
 You can load this code in the following code:
 
 ``` lisp
-(load "aws-lambda-runtime/aws-lambda-runtime.asd")
+(asdf:load-asd "aws-lambda-runtime/aws-lambda-runtime.asd")
 (asdf:load-system :aws-lambda-runtime)
 ```
 

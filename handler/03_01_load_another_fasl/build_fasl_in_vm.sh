@@ -9,6 +9,6 @@ cd $THIS_DIR
 
 sbcl --non-interactive \
      --eval "(ql:quickload :aws-lambda-function-util)" \
-     --load $ASD_FILE \
+     --eval "(asdf:load-asd \"${ASD_FILE}\")" \
      --eval "(ql:quickload ${ASD_SYSTEM_NAME})" \
      --eval "(aws-lambda-function-util:build-monolithic-fasl ${ASD_SYSTEM_NAME} \"$THIS_DIR\")"

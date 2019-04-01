@@ -1,4 +1,4 @@
-(asdf:defsystem :one-big-fasl-example
+(defsystem :one-big-fasl-example
   :description "An example for building one fasl from all srcs."
   :license "MIT"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
