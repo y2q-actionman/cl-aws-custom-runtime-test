@@ -13,6 +13,9 @@ BIN_NAME="bootstrap"
 
 /usr/local/bin/sbcl \
     --non-interactive \
+    --eval "(ql:quickload '#:cl+ssl/config)" \
+    --eval "(cl+ssl/config:define-libssl-path \"/usr/lib64/libssl.so.1.0.2k\")" \
+    --eval "(cl+ssl/config:define-libcrypto-path \"/usr/lib64/libcrypto.so.1.0.2k\")" \
     --eval "(ql:quickload '#:aws-lambda-function-util)" \
     --eval "(ql:quickload '#:aws-lambda-runtime-additional-libraries)" \
     --eval "(ql:quickload '#:aws-lambda-runtime)" \

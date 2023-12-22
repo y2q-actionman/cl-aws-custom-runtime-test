@@ -3,7 +3,7 @@ FROM amazonlinux:2
 RUN mkdir /work
 WORKDIR /work
 
-RUN yum install -y zip bzip2 tar make \
+RUN yum install -y zip bzip2 \
   && rm -rf /var/cache/yum/* \
   && yum clean all    
 
@@ -38,9 +38,6 @@ RUN /usr/local/bin/sbcl --non-interactive \
 # 'aws-lambda-runtime'
 COPY aws-lambda-runtime /work/aws-lambda-runtime/
 RUN /usr/local/bin/sbcl --non-interactive \
-	--eval "(ql:quickload '#:cl+ssl/config)" \
-	--eval "(cl+ssl/config:define-libssl-path \"/usr/lib64/libssl.so.1.0.2k\")" \
-	--eval "(cl+ssl/config:define-libcrypto-path \"/usr/lib64/libcrypto.so.1.0.2k\")" \
 	--eval "(ql:quickload '#:aws-lambda-runtime)" \
 	--eval "(mapc #'ql-dist:clean (ql-dist:all-dists))"
 

@@ -29,6 +29,6 @@ aws lambda create-function \
     --function-name $LAMBDA_FUNC_NAME \
     --zip-file fileb://$ZIP_FILE \
     --handler "main.test-parse-handler" \
-    --runtime provided \
+    --runtime provided.al2 \
     --role $LAMBDA_ROLE \
     --layers $LAMBDA_LAYER

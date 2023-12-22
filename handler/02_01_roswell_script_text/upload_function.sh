@@ -20,6 +20,6 @@ aws lambda create-function \
     --function-name $LAMBDA_FUNC_NAME \
     --zip-file fileb://$ZIP_FILE \
     --handler "hello.ros" \
-    --runtime provided \
+    --runtime provided.al2 \
     --role $LAMBDA_ROLE \
     --layers $LAMBDA_LAYER

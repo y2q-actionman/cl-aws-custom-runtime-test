@@ -13,12 +13,12 @@ ZIP_FILE=$LAMBDA_FUNC_NAME.zip
 
 zip -u $ZIP_FILE *.lisp
 
-# aws lambda delete-function --function-name $LAMBDA_FUNC_NAME
+aws lambda delete-function --function-name $LAMBDA_FUNC_NAME
 
 aws lambda create-function \
     --function-name $LAMBDA_FUNC_NAME \
     --zip-file fileb://$ZIP_FILE \
     --handler "simple_handler.cl-user::simple-handler" \
-    --runtime provided \
+    --runtime provided.al2 \
     --role $LAMBDA_ROLE \
     --layers $LAMBDA_LAYER
