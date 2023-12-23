@@ -8,7 +8,7 @@ RUN yum install -y zip bzip2 tar make \
   && yum clean all    
 
 ## Get SBCL and install it to /usr/local/bin/sbcl
-ARG SBCL_BIN=sbcl-1.5.0-x86-64-linux
+ARG SBCL_BIN=sbcl-1.5.5-x86-64-linux
 RUN curl -s -f -O -L http://prdownloads.sourceforge.net/sbcl/$SBCL_BIN-binary.tar.bz2 \
 	&& tar xvf $SBCL_BIN-binary.tar.bz2 \
 	&& rm $SBCL_BIN-binary.tar.bz2 \
