@@ -15,6 +15,11 @@ A Screenshot of AWS Lambda function console is here:
 ![load-another-fasl exec screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_exec.png)
 <!-- FIXME: use other image! -->
 
+## News (2023-12-25)
+
+Changed Dockerfile to use Amazon Linux 2 instead of Amazon Linux 1, which will be deprecated at Jan 8, 2024.
+For older news, see "History "below.
+
 ## Requirements
 
 - Docker :: For building binaries on AWS lambda environment (aka Amazon Linux). 
@@ -420,6 +425,11 @@ Additionally, I think I want to follow [@windymelt's lambda-over-lambda](https:/
   A new custom runtime implementation.
 
 # History
+
+## 2023-12-25
+
+- Changed Dockerfile to use Amazon Linux 2 instead of Amazon Linux 1, which will be [deprecated at Jan 8, 2024](https://docs.aws.amazon.com/en_us/lambda/latest/dg/images-create.html#runtimes-images-provided)
+- Updated SBCL to 1.5.5. This is the newest version can be built on Amazon Linux 2.
 
 ## 2019-02-26
 
