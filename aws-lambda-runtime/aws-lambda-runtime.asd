@@ -1,6 +1,4 @@
-(in-package :cl-user)
-
-(asdf:defsystem #:aws-lambda-runtime
+(defsystem #:aws-lambda-runtime
   :description "Test and proof-of-concept codes for using SBCL on AWS Lambda."
   :license "MIT"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"

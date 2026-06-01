@@ -1,6 +1,4 @@
-(in-package :cl-user)
-
-(asdf:defsystem #:aws-lambda-function-util
+(defsystem #:aws-lambda-function-util
   :description "Some utilities for building an AWS Lambda function."
   :license "MIT"
   :author "YOKOTA Yuki <y2q.actionman@gmail.com>"
