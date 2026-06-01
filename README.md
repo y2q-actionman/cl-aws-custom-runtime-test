@@ -15,9 +15,10 @@ A Screenshot of AWS Lambda function console is here:
 ![load-another-fasl exec screenshot](https://github.com/y2q-actionman/cl-aws-custom-runtime-test/wiki/images/load_another_fasl_exec.png)
 <!-- FIXME: use other image! -->
 
-## News (2023-12-25)
+## News (2026-06-01)
 
-Changed Dockerfile to use Amazon Linux 2 instead of Amazon Linux 1, which will be deprecated at Jan 8, 2024.
+Changed Dockerfile to use Amazon Linux 2023 (provided.al2023) instead of Amazon Linux 2 (provided.al2), which will be [ending support at July 31, 2026](https://aws.amazon.com/jp/amazon-linux-2/faqs/).
+
 For older news, see "History "below.
 
 ## Requirements
@@ -146,7 +147,7 @@ Upload the zip as a AWS Lambda's layer.
 ``` shell
 aws lambda publish-layer-version \
     --layer-name lisp-layer \
-    --zip-file fileb://aws_lambda_bootstrap.zip
+    --zip-file fileb://build-bootstrap-out/aws_lambda_bootstrap.zip
 ```
 (this is a part of `build_and_publish_custom_runtime.sh`)
 

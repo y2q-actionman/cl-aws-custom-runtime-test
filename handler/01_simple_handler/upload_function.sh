@@ -19,6 +19,6 @@ aws lambda create-function \
     --function-name $LAMBDA_FUNC_NAME \
     --zip-file fileb://$ZIP_FILE \
     --handler "simple_handler.cl-user::simple-handler" \
-    --runtime provided.al2 \
+    --runtime provided.al2023 \
     --role $LAMBDA_ROLE \
     --layers $LAMBDA_LAYER
