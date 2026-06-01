@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-LAMBDA_FUNC_NAME=${LAMBDA_FUNC_NAME:-"simple_handler"}
+LAMBDA_FUNC_NAME="simple_handler"
 LAMBDA_ROLE=${LAMBDA_ROLE:-""}	# Please specify your IAM role here.
 
 # Please specify your cunstom runtime layer's ARN.
