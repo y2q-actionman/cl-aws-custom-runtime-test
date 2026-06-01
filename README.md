@@ -91,11 +91,11 @@ In this section, I'll explain what the script does.
 
 ### About the Dockerfile.
 
-`build-bootstrap/Dockerfile` is a definition of buiding environment.
+The `Dockerfile` in this repository is a definition of buiding environment.
 This Dockerfile does following:
 
 1. It starts with the amazonlinux.
-2. It gets SBCL from the official repository, and installs it. (I've tried `yum` of amazonlinux, but it does not have sbcl.)
+2. It gets SBCL from the official repository, and installs it. (I've tried `yum` on amazonlinux1 and amazonlinux2, or `dnf` on amazonlinux2023. However, they don't have `sbcl`.)
 3. It gets Quicklisp and install it.
 4. It copies runtime sources (`aws-lambda-runtime`, `aws-lambda-function-util`, and `aws-lambda-runtime-additional-libraries`), and install them with some libraries fetched via Quicklisp.
 
@@ -104,7 +104,7 @@ This Dockerfile does following:
 To build a Docker VM named `cl-aws-buildenv`, do following:
 
 ``` shell
-docker build -t cl-aws-buildenv .
+docker buildx build -t cl-aws-buildenv .
 ```
 (this is a part of `build_and_publish_custom_runtime.sh`)
 
@@ -425,6 +425,15 @@ Additionally, I think I want to follow [@windymelt's lambda-over-lambda](https:/
   A new custom runtime implementation.
 
 # History
+
+## 2026-06-01
+
+- Changed Dockerfile to use Amazon Linux 2023 (provided.al2023) instead of Amazon Linux 2 (provided.al2), which will be [ending support at July 31, 2026](https://aws.amazon.com/jp/amazon-linux-2/faqs/).
+- Updated SBCL to 2.5.9. This is the newest version can be used on Amazon Linux 2023. Newer ones will fail with the next error: 
+
+> /usr/local/bin/sbcl: /lib64/libc.so.6: version `GLIBC_2.38' not found (required by /usr/local/bin/sbcl)
+
+相変わらず dnf sbcl はできない。 (Amazon Linux 2023)
 
 ## 2023-12-25
 

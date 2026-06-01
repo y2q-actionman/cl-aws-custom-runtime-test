@@ -4,7 +4,7 @@ cd `dirname $0`
 
 # build a VM.
 VM_NAME="cl-aws-buildenv"
-docker build -t $VM_NAME .
+docker buildx build -t $VM_NAME .
 
 # make a zip file.
 ZIP_NAME="aws_lambda_bootstrap.zip"
