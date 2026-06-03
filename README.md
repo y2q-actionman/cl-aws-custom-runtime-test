@@ -19,7 +19,7 @@ A Screenshot of AWS Lambda function console is here:
 
 Changed Dockerfile to use Amazon Linux 2023 (provided.al2023) instead of Amazon Linux 2 (provided.al2), which will be [ending support at July 31, 2026](https://aws.amazon.com/jp/amazon-linux-2/faqs/).
 
-For older news, see "History "below.
+For older news, see "History" below.
 
 ## Requirements
 
@@ -434,7 +434,7 @@ Additionally, I think I want to follow [@windymelt's lambda-over-lambda](https:/
 
 > /usr/local/bin/sbcl: /lib64/libc.so.6: version `GLIBC_2.38' not found (required by /usr/local/bin/sbcl)
 
-相変わらず dnf sbcl はできない。 (Amazon Linux 2023)
+`dnf install sbcl` still does not work on the Amazon Linux 2023.
 
 ## 2023-12-25
 
